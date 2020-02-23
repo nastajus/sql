@@ -18,9 +18,20 @@ Learned
 * like what?
 * umm..
 * parsing stuff:
-    * remap data formats (with `SET` on user-defined variables `@var_name`)
+    * remap data formats
+        <details>
+        <summary>
+
+        (with `SET`)
+        </summary>
+
+        on user-defined variables `@var_name`
+        </details>
+
     * data hygiene (changed encoding due to emdash incompatibility)
     * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
+* stored procedure stuff:
+    *
 * security model stuff:
     * Used `secure_file_priv` to identify safe path to "upload" files into. (wish for easy-multi-platform script to copy to this location too)...
 
