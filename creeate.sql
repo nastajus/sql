@@ -7,30 +7,14 @@ CREATE SCHEMA IF NOT EXISTS fiction;
 
 USE fiction;
 
-DELIMITER $$
-
-DROP FUNCTION IF EXISTS convert_excel_serial_number_to_date_time;
-CREATE FUNCTION convert_excel_serial_number_to_date_time (
-    serial_number_date INT
-)
-RETURNS DATETIME
-DETERMINISTIC
-BEGIN
-    DECLARE calc DATE;
--- DATE_ADD('1900-01-01', INTERVAL (42973.74257*60*60*24) second) as date
-    SET calc = DATE_ADD('1900-01-01', INTERVAL ((serial_number_date - 2) * 60*60*24) second);
-    RETURN (calc);
-END$$
-DELIMITER ;
-
 DROP TABLE IF EXISTS got;
 CREATE TABLE got (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     release_date DATE NOT NULL,
     season VARCHAR(16) NOT NULL,
     episode VARCHAR(16) NOT NULL,
-    episode_title VARCHAR(32) NOT NULL,
-    name_full VARCHAR(32) NOT NULL, -- not interested in keyword conflicts today
+    episode_title VARCHAR(64) NOT NULL,
+    name_full VARCHAR(32) NOT NULL,
     sentence VARCHAR(2048) NOT NULL
 );
 
