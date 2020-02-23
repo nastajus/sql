@@ -10,11 +10,30 @@ USE fiction;
 
 DELIMITER $$
 DROP FUNCTION  IF EXISTS `proper_case`;
-CREATE FUNCTION `proper_case`(name VARCHAR(128)) RETURNS VARCHAR(128)
+CREATE FUNCTION `proper_case`(str VARCHAR(128)) RETURNS VARCHAR(128)
 BEGIN
-RETURN concat ( upper(substring(name,1,1)), lower(right(name,length(name)-1)));
+
+    DECLARE n, pos INT DEFAULT 1;
+    DECLARE sub, proper VARCHAR(128) DEFAULT '';
+
+    if length(trim(str)) > 0 then
+        WHILE pos > 0 DO
+            set pos = locate(' ',trim(str),n);
+            if pos = 0 then
+                set sub = lower(trim(substr(trim(str),n)));
+            else
+                set sub = lower(trim(substr(trim(str),n,pos-n)));
+            end if;
+
+            set proper = concat_ws(' ', proper, concat(upper(left(sub,1)),substr(sub,2)));
+            set n = pos + 1;
+        END WHILE;
+    end if;
+
+    return trim(proper);
 END
 $$
+
 DELIMITER ;
 
 DROP TABLE IF EXISTS got;
