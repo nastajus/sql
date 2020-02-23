@@ -20,12 +20,9 @@ Learned
 * parsing stuff:
     * remap data formats
         <details>
-        <summary>
+        <summary> (how) </summary>
 
-        (with `SET`)
-        </summary>
-
-        on user-defined variables `@var_name`
+        (with `SET` on user-defined variables `@var_name`)
         </details>
 
     * data hygiene (changed encoding due to emdash incompatibility)
