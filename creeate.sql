@@ -36,6 +36,8 @@ $$
 
 DELIMITER ;
 
+
+-- game of thrones
 DROP TABLE IF EXISTS got;
 CREATE TABLE got (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -51,8 +53,28 @@ LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/game_of_
     INTO TABLE got
     FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
-    IGNORE 1 LINES -- ;
+    IGNORE 1 LINES
 (@release_date, season, episode, episode_title, @name_full, sentence)
 SET
     release_date = STR_TO_DATE(@release_date, '%Y-%m-%d'),
     name_full = proper_case(@name_full);
+
+
+
+-- rick and morty
+DROP TABLE IF EXISTS ram;
+CREATE TABLE ram (
+    -- id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id INT NOT NULL PRIMARY KEY, -- eh, sure. use it.
+    season_no VARCHAR(2) NOT NULL,
+    episode_no VARCHAR(2) NOT NULL,
+    episode_name VARCHAR(64) NOT NULL,
+    name_desc VARCHAR(32) NOT NULL,
+    line VARCHAR(2048) NOT NULL
+);
+
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/rick_and_morty/rickmorty-scripts/RickAndMortyScripts.csv'
+    INTO TABLE ram
+    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 1 LINES
