@@ -64,8 +64,7 @@ SET
 -- rick and morty
 DROP TABLE IF EXISTS ram;
 CREATE TABLE ram (
-    -- id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    id INT NOT NULL PRIMARY KEY, -- eh, sure. use it.
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     season_no VARCHAR(2) NOT NULL,
     episode_no VARCHAR(2) NOT NULL,
     episode_name VARCHAR(64) NOT NULL,
@@ -78,3 +77,4 @@ LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/rick_and
     FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\r\n'
     IGNORE 1 LINES
+ (@skip, season_no, episode_no, episode_name, name_desc, line);
