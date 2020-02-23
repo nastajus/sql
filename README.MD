@@ -11,7 +11,7 @@ Purpose
 * Practice data loading, stored procedures. More to come.
 
 
-Learned
+Learned / Did
 =======
 
 * so much.
@@ -21,13 +21,13 @@ Learned
     * remap data formats
     * data hygiene
     * filtered empty rows
-<!--
-* stored procedure stuff:
-    *
--->
+* model stuff:
+    * collated comparable data
 * security model stuff:
-    * Used `secure_file_priv` to identify safe path to "upload" files into. (wish for easy-multi-platform script to copy to this location too)...
-
+    * Made user-friendly beginning instructions.
+* clean code stuff:
+    * reloads entirely.
+    * reads easily.
 
 <details><summary>
 
@@ -39,6 +39,14 @@ Technical
     * remap data formats (with `SET` on user-defined variables `@var_name`)
     * data hygiene (changed encoding due to emdash incompatibility)
     * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
+* model stuff:
+    * collated comparable data sets by homogenizing id keys
+* security model stuff:
+    * commented out `secure_file_priv` at very beginning to help user identify safe path to "upload" files into.
+        * (wish for easy-multi-platform script to copy to this location too...)
+* clean code stuff:
+    * reloads entirely by dropping prior to creating, by using temporary staging.
+    * reads easily by indenting & commenting appropriately.
 </details>
 
 

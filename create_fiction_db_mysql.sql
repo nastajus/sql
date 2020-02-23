@@ -84,14 +84,14 @@ LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/rick_and
 -- kung fu panda
 
 DELIMITER $$
-DROP FUNCTION  IF EXISTS `extract_name`;
+DROP FUNCTION IF EXISTS `extract_name`;
 CREATE FUNCTION `extract_name`(name_and_line VARCHAR(2048)) RETURNS VARCHAR(2048)
 BEGIN
     RETURN substring_index(`name_and_line`,': ',1); -- first value
 END
 $$
 
-DROP FUNCTION  IF EXISTS `extract_line`;
+DROP FUNCTION IF EXISTS `extract_line`;
 CREATE FUNCTION `extract_line`(name_and_line VARCHAR(2048)) RETURNS VARCHAR(2048)
 BEGIN
     RETURN substring_index(substring_index(`name_and_line`,': ',-1),': ',1); -- second value
