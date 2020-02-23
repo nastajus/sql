@@ -1,7 +1,7 @@
 Setup
 ====
 
-* Requires [MySQL](https://dev.mysql.com/downloads/mysql/) installed. Requires [MySQL](https://dev.mysql.com/downloads/mysql/) installed. Used [DataGrip](https://www.jetbrains.com/datagrip/) mainly & [phpMyAdmin](https://www.phpmyadmin.net/) briefly to view, apply, manipulate. Alternatively [CLI](https://dev.mysql.com/doc/mysql-getting-started/en/) works too.
+* Requires [MySQL](https://dev.mysql.com/downloads/mysql/) installed. Used [DataGrip](https://www.jetbrains.com/datagrip/) mainly & [phpMyAdmin](https://www.phpmyadmin.net/) briefly to view, apply, manipulate. Alternatively [CLI](https://dev.mysql.com/doc/mysql-getting-started/en/) works too.
 * Clone, connect, run.
 * Voila, data.
 
@@ -53,15 +53,11 @@ Technical
 
 Sources
 =======
-* Data sources acquired from [Kaggle](https://www.kaggle.com/).
-
-    *
-    <details><summary> Show/Film scripts </summary>
+* Data sources acquired from [Kaggle](https://www.kaggle.com/) scripts Shows/Films:
 
     * [Game of Thrones](https://www.kaggle.com/albenft/game-of-thrones-script-all-seasons)
     * [Rick and Morty](https://www.kaggle.com/andradaolteanu/rickmorty-scripts)
     * [Kung Fu Panda](https://www.kaggle.com/zusmani/kung-fu-panda)
-</details>
 
 * Much expediency and thanks is naturally a given to StackOverflow community, good documentation on MySQL, good clean datasets on Kaggle, and Google's keyword search algorithm.
 
