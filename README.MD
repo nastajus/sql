@@ -28,6 +28,7 @@ So much. Like :
 * clean code stuff:
     * reloads gracefully.
     * reads easily.
+    * reused functions.
 
 <details><summary>
 
@@ -48,6 +49,7 @@ Technical
 * clean code stuff:
     * reloads gracefully by dropping prior to creating, by using temporary staging.
     * reads easily by indenting & commenting appropriately.
+    * reused functions like `proper_case` for consistent camel case of character names.
 </details>
 
 

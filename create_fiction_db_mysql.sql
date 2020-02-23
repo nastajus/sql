@@ -130,7 +130,7 @@ INSERT INTO kfp (film_no, who, line)
            -- locate(': ', roww) > 0, substring(roww, @who, 1)
            -- @line := locate(': ', roww), substring(roww, @who, 1)
 
-        extract_name(kfp_staging.roww),
+        proper_case(extract_name(kfp_staging.roww)),
         extract_line(kfp_staging.roww)
 
 FROM kfp_staging
