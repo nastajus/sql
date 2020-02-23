@@ -25,7 +25,7 @@ So much. Like :
 * security model stuff:
     * Made user-friendly beginning instructions.
 * clean code stuff:
-    * reloads entirely.
+    * reloads gracefully.
     * reads easily.
 
 <details><summary>
@@ -39,12 +39,13 @@ Technical
     * data hygiene (changed encoding due to emdash incompatibility)
     * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
 * model stuff:
-    * collated comparable data sets by homogenizing id keys
+    * collated comparable data -- by selecting similar data sets, and by homogenizing their id keys, and flattening to per-line statements.
+    * ingested divergent data types uniformly -- fixed width lined content, delimited CSV content, and JSON (upcoming).
 * security model stuff:
     * commented out `secure_file_priv` at very beginning to help user identify safe path to "upload" files into.
         * (wish for easy-multi-platform script to copy to this location too...)
 * clean code stuff:
-    * reloads entirely by dropping prior to creating, by using temporary staging.
+    * reloads gracefully by dropping prior to creating, by using temporary staging.
     * reads easily by indenting & commenting appropriately.
 </details>
 
