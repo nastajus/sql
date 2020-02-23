@@ -87,14 +87,14 @@ DELIMITER $$
 DROP FUNCTION  IF EXISTS `extract_name`;
 CREATE FUNCTION `extract_name`(name_and_line VARCHAR(2048)) RETURNS VARCHAR(2048)
 BEGIN
-    RETURN substring_index(`name_and_line`,':',1); -- first value
+    RETURN substring_index(`name_and_line`,': ',1); -- first value
 END
 $$
 
 DROP FUNCTION  IF EXISTS `extract_line`;
 CREATE FUNCTION `extract_line`(name_and_line VARCHAR(2048)) RETURNS VARCHAR(2048)
 BEGIN
-    RETURN substring_index(substring_index(`name_and_line`,':',-2),':',1); -- second value
+    RETURN substring_index(substring_index(`name_and_line`,': ',-1),': ',1); -- second value
 END
 $$
 
@@ -109,17 +109,26 @@ CREATE TABLE kfp (
     line VARCHAR(2048) -- NOT NULL
 );
 
+DROP TABLE IF EXISTS kfp_staging;
+-- CREATE TEMPORARY TABLE kfp_staging LIKE kfp;
+CREATE TEMPORARY TABLE kfp_staging (
+    roww VARCHAR(2048)
+);
+
 LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/kung_fu_panda/kung-fu-panda/KFP1Script.csv'
-    INTO TABLE kfp
-    -- CHARACTER SET latin1 -- works until line 78 + 5 around " standing — poised — ready "
-    -- CHARACTER SET utf8mb4 -- fails right away
+INTO TABLE kfp_staging
     FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\r\n'
-    IGNORE 5 LINES -- 4
- (@row)
--- SET
--- INTO TABLE kpf
-SET
-    film_no = '1',
-    who = extract_name(@row),
-    line = extract_line(@row);
+    IGNORE 4 LINES;
+
+INSERT INTO kfp (film_no, who, line)
+    SELECT
+       coalesce(11),
+       extract_name(kfp_staging.roww), -- AS f,
+       extract_line(kfp_staging.roww) -- AS ff
+FROM kfp_staging
+WHERE roww > ''; -- > '' CAPTURES EMPTY STRING! HA! .. NOT "IS NOT NULL"
+
+-- DROP TABLE IF EXISTS kfp_staging; -- IRRELEVANT WITH TEMPORARY
+
+
