@@ -13,7 +13,26 @@ CREATE SCHEMA IF NOT EXISTS fiction;
 -- https://stackoverflow.com/questions/199905/mysql-and-comments
 -- okay, good.
 
+-- do i need unique primary key sql?
+-- now, i already know it's a super-good best practice... but... i wanna review why
+-- https://stackoverflow.com/questions/840162/should-each-and-every-table-have-a-primary-key
+-- irrev. nvm.
 CREATE TABLE got (
-    Release Date,Season,Episode,Episode Title,Name,Sentence
-)
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    release_date DATE NOT NULL,
+    season VARCHAR(16) NOT NULL,
+    episode VARCHAR(16) NOT NULL,
+    episode_title VARCHAR(32) NOT NULL,
+    name VARCHAR(32) NOT NULL,
+    sentence VARCHAR(2048) NOT NULL
+);
+
+-- LOAD DATA INFILE 'c:/tmp/discounts.csv'
+LOAD DATA INFILE 'scripts/game_of_thrones/game-of-thrones-script-all-seasons/Game_of_Thrones_Script.csv'
+    INTO TABLE got
+    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES;
+-- IGNORE 1 ROWS;
+
 
