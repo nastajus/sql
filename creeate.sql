@@ -45,4 +45,5 @@ LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/game_of_
 -- (@c1);
 -- (@release_date)
 (@release_date, season, episode, episode_title, name_full, sentence)
-SET release_date = convert_excel_serial_number_to_date_time(@release_date);
+-- SET release_date = convert_excel_serial_number_to_date_time(@release_date);
+SET release_date = STR_TO_DATE(@release_date, '%Y-%m-%d');
