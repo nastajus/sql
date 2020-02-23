@@ -19,17 +19,27 @@ Learned
 * umm..
 * parsing stuff:
     * remap data formats
-        <details><summary> (how) </summary>
-
-        (with `SET` on user-defined variables `@var_name`)</details>
-
-    * data hygiene (changed encoding due to emdash incompatibility)
-    * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
+    * data hygiene
+    * filtered empty rows
+<!--
 * stored procedure stuff:
     *
+-->
 * security model stuff:
     * Used `secure_file_priv` to identify safe path to "upload" files into. (wish for easy-multi-platform script to copy to this location too)...
 
+
+<details><summary>
+
+Technical
+=====
+</summary>
+
+* parsing stuff:
+    * remap data formats (with `SET` on user-defined variables `@var_name`)
+    * data hygiene (changed encoding due to emdash incompatibility)
+    * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
+</details>
 
 
 
