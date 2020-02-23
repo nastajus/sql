@@ -8,6 +8,15 @@ CREATE SCHEMA IF NOT EXISTS fiction;
 
 USE fiction;
 
+DELIMITER $$
+DROP FUNCTION  IF EXISTS `proper_case`;
+CREATE FUNCTION `proper_case`(name VARCHAR(128)) RETURNS VARCHAR(128)
+BEGIN
+RETURN concat ( upper(substring(name,1,1)), lower(right(name,length(name)-1)));
+END
+$$
+DELIMITER ;
+
 DROP TABLE IF EXISTS got;
 CREATE TABLE got (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -24,5 +33,7 @@ LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/game_of_
     FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES -- ;
-(@release_date, season, episode, episode_title, name_full, sentence)
-SET release_date = STR_TO_DATE(@release_date, '%Y-%m-%d');
+(@release_date, season, episode, episode_title, @name_full, sentence)
+SET
+    release_date = STR_TO_DATE(@release_date, '%Y-%m-%d'),
+    name_full = proper_case(@name_full);
