@@ -19,11 +19,9 @@ Learned
 * umm..
 * parsing stuff:
     * remap data formats
-        <details>
-        <summary> (how) </summary>
+        <details><summary> (how) </summary>
 
-        (with `SET` on user-defined variables `@var_name`)
-        </details>
+        (with `SET` on user-defined variables `@var_name`)</details>
 
     * data hygiene (changed encoding due to emdash incompatibility)
     * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
