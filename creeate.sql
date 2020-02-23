@@ -110,7 +110,6 @@ CREATE TABLE kfp (
 );
 
 DROP TABLE IF EXISTS kfp_staging;
--- CREATE TEMPORARY TABLE kfp_staging LIKE kfp;
 CREATE TEMPORARY TABLE kfp_staging (
     roww VARCHAR(2048)
 );
@@ -123,12 +122,21 @@ INTO TABLE kfp_staging
 
 INSERT INTO kfp (film_no, who, line)
     SELECT
-       coalesce(11),
-       extract_name(kfp_staging.roww), -- AS f,
-       extract_line(kfp_staging.roww) -- AS ff
-FROM kfp_staging
-WHERE roww > ''; -- > '' CAPTURES EMPTY STRING! HA! .. NOT "IS NOT NULL"
+       coalesce(1),
+       -- substring(@roww, 1, LOCATE(': ', @roww) - 1),
+       -- substring(@roww, 1, LOCATE(': ', @roww) - 1)
 
--- DROP TABLE IF EXISTS kfp_staging; -- IRRELEVANT WITH TEMPORARY
+        -- select @foo := locate(" Used ", file), substring(file,@foo - 7,1) from test;
+           -- locate(': ', roww) > 0, substring(roww, @who, 1)
+           -- @line := locate(': ', roww), substring(roww, @who, 1)
+        extract_name(kfp_staging.roww),
+        extract_line(kfp_staging.roww)
+
+FROM kfp_staging
+WHERE roww > '' -- > '' CAPTURES EMPTY STRING! HA! .. NOT "IS NOT NULL"
+AND locate(': ', roww) > 0;
+
+-- WHERE roww > ''; -- > '' CAPTURES EMPTY STRING! HA! .. NOT "IS NOT NULL"
+
 
 
