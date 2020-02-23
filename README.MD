@@ -54,6 +54,15 @@ Technical
 Sources
 =======
 * Data sources acquired from [Kaggle](https://www.kaggle.com/).
+
+    *
+    <details><summary> Show/Film scripts </summary>
+
+    * [Game of Thrones](https://www.kaggle.com/albenft/game-of-thrones-script-all-seasons)
+    * [Rick and Morty](https://www.kaggle.com/andradaolteanu/rickmorty-scripts)
+    * [Kung Fu Panda](https://www.kaggle.com/zusmani/kung-fu-panda)
+</details>
+
 * Much expediency and thanks is naturally a given to StackOverflow community, good documentation on MySQL, good clean datasets on Kaggle, and Google's keyword search algorithm.
 
 I just put it all together, standing on the shoulders of these well-versed ahead of me.
