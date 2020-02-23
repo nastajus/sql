@@ -1,19 +1,35 @@
--- https://www.mysqltutorial.org/import-csv-file-mysql-table/
+Setup
+====
 
--- https://stackoverflow.com/questions/1219711/mysql-create-schema-and-create-database-is-there-any-difference
--- https://www.tutorialspoint.com/difference-between-schema-and-database-in-mysql
--- CREATE {DATABASE | SCHEMA} [IF NOT EXISTS] db_name
+* Requires [MySQL](https://dev.mysql.com/downloads/mysql/) installed. Requires [MySQL](https://dev.mysql.com/downloads/mysql/) installed. Used [DataGrip](https://www.jetbrains.com/datagrip/) mainly & [phpMyAdmin](https://www.phpmyadmin.net/) briefly to view, apply, manipulate. Alternatively [CLI](https://dev.mysql.com/doc/mysql-getting-started/en/) works too.
+* Clone, connect, run.
+* Voila, data.
+
+Purpose
+=======
+
+* Practice data loading, stored procedures. More to come.
 
 
--- how do i add comments to a table?
--- https://dev.mysql.com/doc/refman/8.0/en/create-table.html
--- okay technically the syntax is visible, but bleh.
--- create table sample comment on mysql
--- find an actual example
--- https://stackoverflow.com/questions/199905/mysql-and-comments
--- okay, good.
+Learned
+=======
 
--- do i need unique primary key sql?
--- now, i already know it's a super-good best practice... but... i wanna review why
--- https://stackoverflow.com/questions/840162/should-each-and-every-table-have-a-primary-key
--- irrev. nvm.
+* so much.
+* like what?
+* umm..
+* parsing stuff:
+    * remap data formats (with `SET` on user-defined variables `@var_name`)
+    * data hygiene (changed encoding due to emdash incompatibility)
+    * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
+* security model stuff:
+    * Used `secure_file_priv` to identify safe path to "upload" files into. (wish for easy-multi-platform script to copy to this location too)...
+
+
+
+
+Sources
+=======
+* Data sources acquired from [Kaggle](https://www.kaggle.com/).
+* Much expediency and thanks is naturally a given to StackOverflow community, good documentation on MySQL, good clean datasets on Kaggle, and Google's keyword search algorithm.
+
+I just put it all together, standing on the shoulders of these well-versed ahead of me.

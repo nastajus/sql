@@ -1,6 +1,6 @@
 -- SHOW VARIABLES LIKE 'secure_file_priv';
--- run once to discover valid upload folder
--- once found, please copy manually all CSV files to directory, eg may be:
+-- Uncomment above (remove --) and run once to discover valid upload folder.
+-- Once found, please copy manually all CSV files to directory, eg may be:
 -- C:\ProgramData\MySQL\MySQL Server 5.7\Uploads\
 
 
@@ -129,6 +129,7 @@ INSERT INTO kfp (film_no, who, line)
         -- select @foo := locate(" Used ", file), substring(file,@foo - 7,1) from test;
            -- locate(': ', roww) > 0, substring(roww, @who, 1)
            -- @line := locate(': ', roww), substring(roww, @who, 1)
+
         extract_name(kfp_staging.roww),
         extract_line(kfp_staging.roww)
 
@@ -136,7 +137,6 @@ FROM kfp_staging
 WHERE roww > '' -- > '' CAPTURES EMPTY STRING! HA! .. NOT "IS NOT NULL"
 AND locate(': ', roww) > 0;
 
--- WHERE roww > ''; -- > '' CAPTURES EMPTY STRING! HA! .. NOT "IS NOT NULL"
 
 
 
