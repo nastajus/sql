@@ -14,9 +14,8 @@ Purpose
 Learned / Did
 =======
 
-* so much.
-* like what?
-* umm..
+So much. Like :
+
 * parsing stuff:
     * remap data formats
     * data hygiene
