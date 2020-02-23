@@ -22,9 +22,10 @@ So much. Like :
     * filtered empty rows
 * model stuff:
     * collated comparable data
-    * uniformly ingested divergent data formats
-* security model stuff:
-    * Made user-friendly beginning instructions.
+    * uniformly ingested divergent formats
+* project management stuff:
+    * user-friendly defaults/clues.
+    * limited scope creep.
 * clean code stuff:
     * reloads gracefully.
     * reads easily.
@@ -36,16 +37,19 @@ Technical
 =====
 </summary>
 
+Like, justifying my actual statements:
+
 * parsing stuff:
     * remap data formats (with `SET` on user-defined variables `@var_name`)
     * data hygiene (changed encoding due to emdash incompatibility)
     * filtered empty rows (with temporary staging table and `INSERT..SELECT`)
 * model stuff:
     * collated comparable data -- by selecting similar data sets, and by homogenizing their id keys, and flattening to per-line statements.
-    * uniformly ingested divergent data formats -- by flattening relations for each fixed width lined content, delimited CSV content, and JSON (upcoming).
-* security model stuff:
-    * commented out `secure_file_priv` at very beginning to help user identify safe path to "upload" files into.
-        * (wish for easy-multi-platform script to copy to this location too...)
+    * uniformly ingested divergent formats -- by flattening relations for each fixed width lined content, delimited CSV content, and JSON (upcoming).
+* project management stuff:
+    * user friendly defaults by beginning instructions commented out `secure_file_priv` to help new users quickly identify safe path to "upload" files into.
+    * limited scope creep by restraining desires to maximize friendliness in short time span...
+        * (wish to also write easy-multi-platform script to copy to this location too... but that's waaaay outside scope of this project...)
 * clean code stuff:
     * reloads gracefully by dropping prior to creating, by using temporary staging.
     * reads easily by indenting & commenting appropriately.
