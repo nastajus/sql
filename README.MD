@@ -33,7 +33,7 @@ So much. Like :
 
 <details><summary>
 
-Technical
+Technical (click to expand)
 =====
 </summary>
 
