@@ -1,7 +1,15 @@
+-- SHOW VARIABLES LIKE 'secure_file_priv';
+-- once run, please copy manually all CSV files to directory, eg may be:
+-- C:\ProgramData\MySQL\MySQL Server 5.7\Uploads\
+
+
 CREATE SCHEMA IF NOT EXISTS fiction;
+
+USE fiction;
 
 DELIMITER $$
 
+DROP FUNCTION IF EXISTS convert_excel_serial_number_to_date_time;
 CREATE FUNCTION convert_excel_serial_number_to_date_time (
     serial_number_date INT
 )
@@ -15,6 +23,7 @@ BEGIN
 END$$
 DELIMITER ;
 
+DROP TABLE IF EXISTS got;
 CREATE TABLE got (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     release_date DATE NOT NULL,
@@ -26,7 +35,7 @@ CREATE TABLE got (
 );
 
 -- LOAD DATA INFILE 'c:/tmp/discounts.csv'
-LOAD DATA INFILE 'scripts/game_of_thrones/game-of-thrones-script-all-seasons/Game_of_Thrones_Script.csv'
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/game_of_thrones/game-of-thrones-script-all-seasons/Game_of_Thrones_Script.csv'
     INTO TABLE got
     FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
