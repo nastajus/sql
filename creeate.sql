@@ -5,7 +5,6 @@
 
 
 CREATE SCHEMA IF NOT EXISTS fiction;
-
 USE fiction;
 
 DELIMITER $$
@@ -78,3 +77,49 @@ LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/rick_and
     LINES TERMINATED BY '\r\n'
     IGNORE 1 LINES
  (@skip, season_no, episode_no, episode_name, name_desc, line);
+
+
+
+
+-- kung fu panda
+
+DELIMITER $$
+DROP FUNCTION  IF EXISTS `extract_name`;
+CREATE FUNCTION `extract_name`(name_and_line VARCHAR(2048)) RETURNS VARCHAR(2048)
+BEGIN
+    RETURN substring_index(`name_and_line`,':',1); -- first value
+END
+$$
+
+DROP FUNCTION  IF EXISTS `extract_line`;
+CREATE FUNCTION `extract_line`(name_and_line VARCHAR(2048)) RETURNS VARCHAR(2048)
+BEGIN
+    RETURN substring_index(substring_index(`name_and_line`,':',-2),':',1); -- second value
+END
+$$
+
+DELIMITER ;
+
+
+DROP TABLE IF EXISTS kfp;
+CREATE TABLE kfp (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    film_no VARCHAR(2) NOT NULL,
+    who VARCHAR(2048), -- NOT NULL,
+    line VARCHAR(2048) -- NOT NULL
+);
+
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/kung_fu_panda/kung-fu-panda/KFP1Script.csv'
+    INTO TABLE kfp
+    -- CHARACTER SET latin1 -- works until line 78 + 5 around " standing — poised — ready "
+    -- CHARACTER SET utf8mb4 -- fails right away
+    FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 5 LINES -- 4
+ (@row)
+-- SET
+-- INTO TABLE kpf
+SET
+    film_no = '1',
+    who = extract_name(@row),
+    line = extract_line(@row);
