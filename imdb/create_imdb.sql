@@ -18,7 +18,7 @@ CREATE TABLE title_akas (
 );
 
 LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/title.akas.utf8.tsv' IGNORE
-    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/game_of_thrones/game-of-thrones-script-all-seasons/Game_of_Thrones_Script.csv'
+    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
     INTO TABLE title_akas
     CHARACTER SET utf8
     FIELDS TERMINATED BY '\t' -- OPTIONALLY ENCLOSED BY '"' -- noooo~!!
@@ -46,3 +46,30 @@ where id in
       );
 
 
+
+
+
+
+
+DROP TABLE IF EXISTS name_basics;
+CREATE TABLE name_basics (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nconst TEXT,
+    primaryName TEXT,
+    birthYear INT,
+    deathYear INT,
+    primaryProfession TEXT,
+    knownForTitles TEXT
+);
+
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
+    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
+    INTO TABLE name_basics
+    -- CHARACTER SET utf8
+    FIELDS TERMINATED BY '\t' -- OPTIONALLY ENCLOSED BY '"' -- noooo~!!
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+(nconst, primaryName, @vbirthYear, @vdeathYear, primaryProfession, knownForTitles)
+SET
+    birthYear = nullif(@vbirthYear, '\\N'),
+    deathYear = nullif(@vdeathYear, '\\N');
