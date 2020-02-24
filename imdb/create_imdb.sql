@@ -28,16 +28,10 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/title.akas.ut
 
 
 
-select * from imdb.title_akas where title like '%star trek%' and region = 'US';
-
-select titleId, ordering, title, region, language, types, attributes, isOriginalTitle from imdb.title_akas where title like '%star trek%'
-INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/star-trek.tsv';
-
-select * from imdb.title_akas where title like '%star trek%' and region = 'US';
-
-select titleId, ordering, title from imdb.title_akas where title like '%star trek%' and region in ('US', '\\N')
+select titleId, ordering, title, region
+from imdb.title_akas
+where title like '%star trek%' and (region in ('US', '\\N') or region is NULL)
 INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/star-trek-us.tsv';
-
 
 
 SELECT MAX(id) FROM imdb.title_akas;
@@ -50,10 +44,5 @@ where id in
            ((SELECT MAX(id) FROM imdb.title_akas) - 1),
            ((SELECT MAX(id) FROM imdb.title_akas) - 0)
       );
-
-
-SELECT table_catalog, table_schema, table_name, column_name, CHARACTER_MAXIMUM_LENGTH, CHARACTER_OCTET_LENGTH
-FROM INFORMATION_SCHEMA.columns
-WHERE table_name = 'title_akas';
 
 
