@@ -129,3 +129,22 @@ TRANSFORMED INTO TABLE FORMAT
 - deathYear
 - primaryProfession (array of strings)– the top-3 professions of the person
 - knownForTitles (array of tconsts)
+
+
+
+
+
+ALMOST DONE
+
+====
+
+title_akas
+
+- titleId VARCHAR(10) NOT NULL -- tt0000001
+- ordering TEXT
+- title TEXT
+- region VARCHAR(8)
+- language TEXT
+- types TEXT
+- attributes TEXT
+- isOriginalTitle BOOLEAN -- NOT NULL
