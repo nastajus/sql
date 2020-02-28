@@ -67,7 +67,10 @@ FROM information_schema.tables WHERE engine='InnoDB') A;
 -- due to nulls being considered by design as "unique" and most actors birthYear being null.
 
 -- :face-palm:
--- ... which I've caused myself by setting each birthYear = nullif and deathYear = nullif ...
+-- ... which I *partially* caused myself by converting `\N` to real `null`.
+-- ... by setting each birthYear = nullif and deathYear = nullif ...
+-- ... but really the fault originally lies with the raw data containing dupes.
+-- ... so ultimately not my fault originally, and i'm just learning to deal with it.
 -- ugh. sigh.
 
 -- I've experimented with loading as each TEXT and VARCHAR... each has pros/cons.
