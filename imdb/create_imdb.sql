@@ -49,6 +49,16 @@ where id in
 
 
 
+-- help to discover ideal size to set your database to actually perform this update without failing.
+-- run this ti determine number of gigabytes to set innodb_buffer_pool_size to in my.ini / my.cnf.
+SELECT CEILING(Total_InnoDB_Bytes*1.6/POWER(1024,3)) RIBPS FROM
+(SELECT SUM(data_length+index_length) Total_InnoDB_Bytes
+FROM information_schema.tables WHERE engine='InnoDB') A;
+-- output was "6"  --> which means set my innodb_buffer_pool_size to "6GB" in my "my.ini" file (my.cnf on unix).
+
+
+
+
 
 -- so... IMDB table NAME_BASICS had some challenges to load... it failed repeatedly when using VARCHAR, but I wanted VARCHAR > TEXT for certain size-counting benefits...
 -- so... i was able to load fully as TEXT and then ALTER to be VARCHAR... but the 15 minutes + trial/error wasn't worth it in hindsight.
@@ -57,20 +67,24 @@ where id in
 DROP TABLE IF EXISTS name_basics;
 CREATE TABLE name_basics (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    nconst TEXT, -- VARCHAR(10),
-    primaryName TEXT, -- VARCHAR(128),
+    nconst VARCHAR(10),
+    primaryName VARCHAR(128),
     birthYear INT,
     deathYear INT,
-    primaryProfession TEXT, -- VARCHAR(128),
-    knownForTitles TEXT  -- VARCHAR(128),
+    primaryProfession VARCHAR(128),
+    knownForTitles VARCHAR(128),
 
 
     -- this was valid only with VARCHAR and not TEXT, but i had errors loading with VARCHAR directly...
     -- possibly could've avoided all the following queries by addressing that original error.
     -- suspect i just needed to boost `innodb_buffer_pool_size` from default 8 MB to ~ some GB in hindsight.
 
-    -- UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
+    UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
 );
+
+-- 5 minutes, works with good settings ! YAY.
+-- ok so... i tried loading with the unique index.. but i still get dupes.. just less.
+
 
 -- clearly has duplicates often from very beginning... leaving for now...
 LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
@@ -89,7 +103,6 @@ ALTER TABLE name_basics MODIFY nconst VARCHAR(10);
 ALTER TABLE name_basics MODIFY primaryName VARCHAR(128);
 ALTER TABLE name_basics MODIFY primaryProfession VARCHAR(128);
 ALTER TABLE name_basics MODIFY knownForTitles VARCHAR(128);
-
 
 
 SELECT MAX(id) FROM imdb.name_basics; -- 16352122 with dupes.
@@ -111,13 +124,6 @@ SHOW TABLE status FROM imdb;
 
 
 
--- help to discover ideal size to set your database to actually perform this update without failing.
--- run this ti determine number of gigabytes to set innodb_buffer_pool_size to in my.ini / my.cnf.
-SELECT CEILING(Total_InnoDB_Bytes*1.6/POWER(1024,3)) RIBPS FROM
-(SELECT SUM(data_length+index_length) Total_InnoDB_Bytes
-FROM information_schema.tables WHERE engine='InnoDB') A;
--- output was "6"  --> which means set my innodb_buffer_pool_size to "6GB" in my "my.ini" file (my.cnf on unix).
-
 
 
 select * from information_schema.STATISTICS where TABLE_SCHEMA = 'imdb';
@@ -127,8 +133,7 @@ select * from information_schema.STATISTICS where TABLE_SCHEMA = 'imdb';
 INSERT INTO name_basics_v2
 SELECT * FROM name_basics GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles; -- 6 minutes to check just select
 
-DROP TABLE IF EXISTS name_basics;
-RENAME TABLE name_basics_v2 TO name_basics;
+
 
 ALTER TABLE name_basics_v2
     -- DROP PRIMARY KEY,
@@ -151,3 +156,28 @@ ALTER TABLE name_basics_v2 CHANGE idd id INT NOT NULL;
 
 ALTER TABLE name_basics_v2 ADD id INT PRIMARY KEY AUTO_INCREMENT FIRST ;
 ALTER TABLE name_basics_v2 DROP idd;
+
+DROP TABLE IF EXISTS name_basics;
+RENAME TABLE name_basics_v2 TO name_basics_clean;
+
+select count(*) from (
+SELECT *, count(nconst) as c
+FROM name_basics
+GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles
+having c > 1
+) as cc; -- result is 6338674 dupes still found, and in only 30 seconds!
+
+
+-- 16352122 entries loaded raw with dupes.
+-- 15847335 entries loaded with unique key filter...
+--  6338674 dupes still found after unique key filter...
+--        0 dupes found in "_clean" table...
+--  9771478 entries in clean table...
+
+-- i made an assumption about how unique key worked
+-- i'd assumed by just adding a all the columns in one gigantic list it'll maximize uniqueness...
+-- and i was further validated by my initial dependence on the first entries only checked...
+-- but in reality the 90% still slipped through, just, passed the first 100 entries... so... ya... somehow misses tons still.
+-- UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
+-- okay, this is why:
+-- https://stackoverflow.com/questions/41014240/mysql-unique-key-does-not-work
