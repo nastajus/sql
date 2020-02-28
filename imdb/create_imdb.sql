@@ -1,8 +1,15 @@
--- SHOW VARIABLES LIKE 'secure_file_priv';
+--  IMDb data format specification : https://www.imdb.com/interfaces/
+--  IMDb data source download :      https://datasets.imdbws.com/
 
+-- reminder where to actually put your CSV files to actually be found to load.
+SHOW VARIABLES LIKE 'secure_file_priv';
 
 CREATE SCHEMA IF NOT EXISTS imdb;
 USE imdb;
+
+-- helper to get useful details on the tables in a schema. Particularly `rows` & `avg_row_length`.
+SHOW TABLE status FROM imdb;
+
 
 DROP TABLE IF EXISTS title_akas;
 CREATE TABLE title_akas (
@@ -17,25 +24,43 @@ CREATE TABLE title_akas (
     isOriginalTitle BOOLEAN
 );
 
+-- convert raw IMBd downloaded CSV to UTF8 first using Notepad++ or KainetEditor for example.
 LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/title.akas.utf8.tsv' IGNORE
     -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
     INTO TABLE title_akas
     CHARACTER SET utf8
-    FIELDS TERMINATED BY '\t' -- OPTIONALLY ENCLOSED BY '"' -- noooo~!!
+    FIELDS TERMINATED BY '\t'
     LINES TERMINATED BY '\n'
-     IGNORE 1 LINES
+    IGNORE 1 LINES
 (titleId, ordering, title, region, language, types, attributes, isOriginalTitle);
 
 
 
-select titleId, ordering, title, region
-from imdb.title_akas
-where title like '%star trek%' and (region in ('US', '\\N') or region is NULL)
-INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/star-trek-us.tsv';
+
+-- At this point it gets increasingly difficult to successfully load the large IMBd datasets without critical failure.
+-- Especially if default MySQL 8 MB pool size from installation is left alone.
+-- The fact the above `title_akas` succeeded is perhaps by pure coincidence my system had enough strength.
+
+-- To help to discover ideal size to set your pool size to actually perform this update without failing,
+-- run this to determine number of gigabytes to set innodb_buffer_pool_size to in my.ini / my.cnf.
+-- You may have to create this file for the first time.
+-- On my Windows it goes at `C:\ProgramData\MySQL\MySQL Server 5.7\my.ini`.
+-- On Unix-based systems I'm unsure where, but the convention uses `my.cnf`.
+SELECT CEILING(Total_InnoDB_Bytes*1.6/POWER(1024,3)) RIBPS FROM
+(SELECT SUM(data_length+index_length) Total_InnoDB_Bytes
+FROM information_schema.tables WHERE engine='InnoDB') A;
+-- output was "6"  --> which means set my innodb_buffer_pool_size to "6GB" in my "my.ini" file (my.cnf on unix).
+-- however given my RAM limitations I see realistically I could only give "3GB" which worked well,
+-- otherwise paging thrashing would've tanked performance significantly which is perhaps worse than a tiny buffer.
 
 
-SELECT MAX(id) FROM imdb.title_akas;
 
+
+
+-- This previously helped diagnose and resolve a loading error with `title.akas.tsv`
+-- My naive copy-pasta included the clause ` OPTIONALLY ENCLOSED BY '"' ` which massively ruined loading.
+-- Ultimately it was really about careful examination of the data around the error that clued me into the solution,
+-- in a tool that could handle loading large files easily without crashing, which KainetEditor does an amazing job.
 select * from imdb.title_akas
 where id in
       (
@@ -49,12 +74,6 @@ where id in
 
 
 
--- help to discover ideal size to set your database to actually perform this update without failing.
--- run this ti determine number of gigabytes to set innodb_buffer_pool_size to in my.ini / my.cnf.
-SELECT CEILING(Total_InnoDB_Bytes*1.6/POWER(1024,3)) RIBPS FROM
-(SELECT SUM(data_length+index_length) Total_InnoDB_Bytes
-FROM information_schema.tables WHERE engine='InnoDB') A;
--- output was "6"  --> which means set my innodb_buffer_pool_size to "6GB" in my "my.ini" file (my.cnf on unix).
 
 
 
@@ -75,9 +94,11 @@ CREATE TABLE name_basics (
     knownForTitles VARCHAR(128),
 
 
-    -- this was valid only with VARCHAR and not TEXT, but i had errors loading with VARCHAR directly...
-    -- possibly could've avoided all the following queries by addressing that original error.
-    -- suspect i just needed to boost `innodb_buffer_pool_size` from default 8 MB to ~ some GB in hindsight.
+    -- This was valid only with VARCHAR and not TEXT, but i had errors loading with VARCHAR directly...
+    -- Suspect i just needed to boost `innodb_buffer_pool_size` from default 8 MB to ~ some GB in hindsight.
+    -- However this still fails to filter 90% of duplicates due to nulls being considered unique by design.
+    -- The remaining duplicates should all contain a null field, usually deathYear.
+    -- Maybe should convert deathYear to a known empty string to better filter out duplicates on init load.
 
     UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
 );
@@ -117,8 +138,7 @@ create table name_basics_v2 like name_basics;
 -- [HY000][3167] The 'INFORMATION_SCHEMA.GLOBAL_VARIABLES' feature is disabled; see the documentation for 'show_compatibility_56'
 SELECT variable_value FROM information_schema.global_variables WHERE variable_name = 'innodb_buffer_pool_size';
 
--- get interesting data on various details on the tables in a schema. cool.  rows + avg_row_length in particular
-SHOW TABLE status FROM imdb;
+
 
 
 
@@ -181,3 +201,14 @@ having c > 1
 -- UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
 -- okay, this is why:
 -- https://stackoverflow.com/questions/41014240/mysql-unique-key-does-not-work
+
+
+
+
+
+
+-- extract small subset of data, cool.
+select titleId, ordering, title, region
+from imdb.title_akas
+where title like '%star trek%' and (region in ('US', '\\N') or region is NULL)
+INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/star-trek-us.tsv';
