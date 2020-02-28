@@ -63,6 +63,12 @@ CREATE TABLE name_basics (
     deathYear INT,
     primaryProfession TEXT, -- VARCHAR(128),
     knownForTitles TEXT  -- VARCHAR(128),
+
+
+    -- this was valid only with VARCHAR and not TEXT, but i had errors loading with VARCHAR directly...
+    -- possibly could've avoided all the following queries by addressing that original error.
+    -- suspect i just needed to boost `innodb_buffer_pool_size` from default 8 MB to ~ some GB in hindsight.
+
     -- UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
 );
 
@@ -71,7 +77,7 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.
     -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
     INTO TABLE name_basics
     -- CHARACTER SET utf8
-    FIELDS TERMINATED BY '\t' -- OPTIONALLY ENCLOSED BY '"' -- noooo~!!
+    FIELDS TERMINATED BY '\t'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
 (nconst, primaryName, @vbirthYear, @vdeathYear, primaryProfession, knownForTitles)
@@ -85,74 +91,13 @@ ALTER TABLE name_basics MODIFY primaryProfession VARCHAR(128);
 ALTER TABLE name_basics MODIFY knownForTitles VARCHAR(128);
 
 
-select * from imdb.name_basics;
-
-select * from information_schema.COLUMNS where TABLE_SCHEMA = 'imdb';
-
-select nconst, count(nconst) c, primaryName, knownForTitles from name_basics
-where birthYear > 1980
-group by nconst -- having c > 2
-limit 100;
-
-select primaryName, (char_length(primaryName)) from name_basics; -- okay.
-select avg(char_length(primaryName)) from name_basics; -- 13.5081
-select stddev(char_length(primaryName)) from name_basics; -- 3.3352891132917413
-select variance(char_length(primaryName)) from name_basics; -- 11.12415346924241
-
-
-select count(char_length(primaryName)), char_length(primaryName) from name_basics; -- 16352122	12  -- umm... weird... okay..
-select count(char_length(primaryName)) from name_basics group by char_length(primaryName);
-select count(char_length(primaryName)),char_length(primaryName) from name_basics group by char_length(primaryName); -- interesting... okay... cool..
-select count(char_length(primaryProfession)),char_length(primaryProfession) from name_basics group by char_length(primaryProfession); -- interesting... okay... cool..
-select count(char_length(knownForTitles)),char_length(knownForTitles) from name_basics group by char_length(knownForTitles); -- interesting... okay... cool..
-
 
 SELECT MAX(id) FROM imdb.name_basics; -- 16352122 with dupes.
+select max(id), id from name_basics group by id; -- found 1's and 2's exclusively everywhere... the heck.
 
 
-select max(id), id from name_basics group by id;
-
--- well.. technically could work, but ... join on self of a gigabyte of data seems will take horribly long
-delete nb1
--- select *
-from name_basics nb1
-inner join name_basics nb2
-where nb1.id < nb2.id and
-      nb1.primaryName = nb2.primaryName and
-      nb1.birthYear = nb2.birthYear and
-      nb1.deathYear = nb2.deathYear and
-      nb1.primaryProfession = nb2.primaryProfession and
-      nb1.knownForTitles = nb2.knownForTitles;
--- limit 10;
-
-
+-- due to the massively high number of duplicates in IMDb's name_basics, a new table will be used to filter out uniques.
 create table name_basics_v2 like name_basics;
-
-INSERT INTO name_basics_v2 (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
-SELECT nb1.nconst, nb1.primaryName, nb1.birthYear, nb1.deathYear, nb1.primaryProfession, nb1.knownForTitles FROM name_basics nb1
-inner join name_basics nb2
-where nb1.id < nb2.id and
-      nb1.primaryName = nb2.primaryName and
-      nb1.birthYear = nb2.birthYear and
-      nb1.deathYear = nb2.deathYear and
-      nb1.primaryProfession = nb2.primaryProfession and
-      nb1.knownForTitles = nb2.knownForTitles;
-
-
-SELECT * FROM name_basics WHERE id > 4 ORDER BY id LIMIT 1;
-
-
-
-
-
-
-DROP TABLE name_basics_test;
-CREATE TABLE name_basics_test LIKE name_basics;
-
-INSERT INTO name_basics_test SELECT * FROM name_basics; -- limit 500; -- okay, works. cool.
--- 10 minutes later [HY000][1206] The total number of locks exceeds the lock table size .... when i had 6 MB!~
--- 2 minutes later it succeeded when it was set to 3GB in my.ini and restarted the service mysql57.
-
 
 
 -- attempted this query to get "innodb_buffer_pool_size" but couldn't be bothered to change settings
@@ -175,12 +120,12 @@ FROM information_schema.tables WHERE engine='InnoDB') A;
 
 
 
-ALTER IGNORE TABLE name_basics_test ADD UNIQUE (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles);
-
 select * from information_schema.STATISTICS where TABLE_SCHEMA = 'imdb';
 
 
 -- took 17 minutes to finish ~1 GB of unique migrating. cool.
 INSERT INTO name_basics_v2
-SELECT * FROM name_basics_test GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles; -- 6 minutes to check
+SELECT * FROM name_basics GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles; -- 6 minutes to check
 
+DROP TABLE IF EXISTS name_basics;
+RENAME TABLE name_basics_v2 TO name_basics;
