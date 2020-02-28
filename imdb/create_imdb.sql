@@ -125,7 +125,29 @@ select * from information_schema.STATISTICS where TABLE_SCHEMA = 'imdb';
 
 -- took 17 minutes to finish ~1 GB of unique migrating. cool.
 INSERT INTO name_basics_v2
-SELECT * FROM name_basics GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles; -- 6 minutes to check
+SELECT * FROM name_basics GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles; -- 6 minutes to check just select
 
 DROP TABLE IF EXISTS name_basics;
 RENAME TABLE name_basics_v2 TO name_basics;
+
+ALTER TABLE name_basics_v2
+    -- DROP PRIMARY KEY,
+    ADD idd INT PRIMARY KEY AUTO_INCREMENT FIRST ;
+-- above combo failed:
+-- [42000][1075] Incorrect table definition; there can be only one auto column and it must be defined as a key
+-- i wanna drop  AUTO_INCREMENT
+-- ok so do this instead:
+
+ALTER TABLE name_basics_v2 MODIFY id INT NOT NULL ;
+ALTER TABLE name_basics_v2  DROP PRIMARY KEY;
+
+-- ALTER TABLE table_name RENAME COLUMN old_col_name TO new_col_name;
+ALTER TABLE name_basics_v2 RENAME COLUMN id TO idd;
+-- [42000][1064] You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'COLUMN id TO idd' at line 1
+-- ALTER TABLE `records` CHANGE `student_id` `id` INT NOT NULL;
+ALTER TABLE `name_basics_v2` CHANGE `id` `idd` INT NOT NULL;
+ALTER TABLE name_basics_v2 CHANGE idd id INT NOT NULL;
+-- sigh. good. that worked. back and forth both, with and without backticks.
+
+ALTER TABLE name_basics_v2 ADD id INT PRIMARY KEY AUTO_INCREMENT FIRST ;
+ALTER TABLE name_basics_v2 DROP idd;
