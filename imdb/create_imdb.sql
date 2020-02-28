@@ -57,34 +57,23 @@ FROM information_schema.tables WHERE engine='InnoDB') A;
 
 
 
--- This previously helped diagnose and resolve a loading error with `title.akas.tsv`
--- My naive copy-pasta included the clause ` OPTIONALLY ENCLOSED BY '"' ` which massively ruined loading.
--- Ultimately it was really about careful examination of the data around the error that clued me into the solution,
--- in a tool that could handle loading large files easily without crashing, which KainetEditor does an amazing job.
-select * from imdb.title_akas
-where id in
-      (
-           ((SELECT MAX(id) FROM imdb.title_akas) - 3),
-           ((SELECT MAX(id) FROM imdb.title_akas) - 2),
-           ((SELECT MAX(id) FROM imdb.title_akas) - 1),
-           ((SELECT MAX(id) FROM imdb.title_akas) - 0)
-      );
 
 
+-- `name_basics` has some challenges to load cleanly.
+-- First, must increase default mysql pool size to from megabytes to gigabytes, or will likely fail critically to load.
+-- Second, understand ~41% entries from the raw CSV download are duplicates.
+-- so some additional filtering operations are necessary.
+-- Third, finally, unfortunately just using `UNIQUE KEY` is insufficient to filter out ~90% of duplicates,
+-- due to nulls being considered by design as "unique" and most actors birthYear being null.
 
+-- :face-palm:
+-- ... which I've caused myself by setting each birthYear = nullif and deathYear = nullif ...
+-- ugh. sigh.
 
+-- I've experimented with loading as each TEXT and VARCHAR... each has pros/cons.
 
-
-
-
-
-
--- so... IMDB table NAME_BASICS had some challenges to load... it failed repeatedly when using VARCHAR, but I wanted VARCHAR > TEXT for certain size-counting benefits...
--- so... i was able to load fully as TEXT and then ALTER to be VARCHAR... but the 15 minutes + trial/error wasn't worth it in hindsight.
--- anyways, i still have duplicates, so... i dunno why, but that data is full of duplicates...
-
-DROP TABLE IF EXISTS name_basics;
-CREATE TABLE name_basics (
+DROP TABLE IF EXISTS name_basics_with_dupes;
+CREATE TABLE name_basics_with_dupes (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nconst VARCHAR(10),
     primaryName VARCHAR(128),
@@ -110,7 +99,7 @@ CREATE TABLE name_basics (
 -- clearly has duplicates often from very beginning... leaving for now...
 LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
     -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
-    INTO TABLE name_basics
+    INTO TABLE name_basics_with_dupes
     -- CHARACTER SET utf8
     FIELDS TERMINATED BY '\t'
     LINES TERMINATED BY '\n'
