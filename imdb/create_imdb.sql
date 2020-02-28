@@ -110,43 +110,9 @@ select count(char_length(knownForTitles)),char_length(knownForTitles) from name_
 SELECT MAX(id) FROM imdb.name_basics; -- 16352122 with dupes.
 
 
--- so... the imdb name_basics dataset  full of duplicates... okay... time to eliminate...
-
--- delete
--- from employee using employee,
---     employee e1
--- where employee.id > e1.id
---     and employee.first_name = e1.first_name
-
--- select *
--- from imdb.name_basics using imdb.name_basics as nb
--- where imdb.name_basics.id > nb.id
---     and imdb.name_basics.nconst = nb.nconst
--- limit 10;
-
--- SELECT MAX(ID) FROM t GROUP BY unique and then JOIN to an exact match of ID to MAX(ID)?
--- select max(id) from name_basics group by -- unique;
 select max(id), id from name_basics group by id;
 
-
-SELECT
-    primaryName, COUNT(primaryName)
-FROM
-    name_basics
-GROUP BY
-    primaryName
-HAVING
-    COUNT(primaryName) > 1
-limit 10;
-
-
-DELETE t1 FROM contacts t1
-INNER JOIN contacts t2
-WHERE
-    t1.id < t2.id AND
-    t1.email = t2.email;
-
-
+-- well.. technically could work, but ... join on self of a gigabyte of data seems will take horribly long
 delete nb1
 -- select *
 from name_basics nb1
@@ -158,6 +124,7 @@ where nb1.id < nb2.id and
       nb1.primaryProfession = nb2.primaryProfession and
       nb1.knownForTitles = nb2.knownForTitles;
 -- limit 10;
+
 
 create table name_basics_v2 like name_basics;
 
@@ -177,23 +144,6 @@ SELECT * FROM name_basics WHERE id > 4 ORDER BY id LIMIT 1;
 
 
 
-DROP PROCEDURE IF EXISTS remove_adjacent_duplicate_rows;
-DELIMITER ;;
-
-CREATE PROCEDURE remove_adjacent_duplicate_rows()
-BEGIN
-DECLARE n INT DEFAULT 0;
-DECLARE i INT DEFAULT 0;
-SELECT COUNT(*) FROM name_basics INTO n;
-SET i=0;
-WHILE i<n DO
-  INSERT INTO name_basics_v2 (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)  -- (ID, VAL)  -- SELECT (ID, VAL) FROM name_basics LIMIT i,1;
-  SELECT (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles) FROM name_basics WHERE id > i ORDER BY id LIMIT 1;
-  -- nah, this will fail logically. at each i it will still insert...
-  SET i = i + 1;
-END WHILE;
-End;
-;;
 
 
 DROP TABLE name_basics_test;
@@ -204,65 +154,24 @@ INSERT INTO name_basics_test SELECT * FROM name_basics; -- limit 500; -- okay, w
 -- 2 minutes later it succeeded when it was set to 3GB in my.ini and restarted the service mysql57.
 
 
-SELECT FLOOR(SUM(data_length+index_length)/POWER(1024,2)) InnoDBSizeMB
-FROM information_schema.tables WHERE engine='InnoDB';
 
+-- attempted this query to get "innodb_buffer_pool_size" but couldn't be bothered to change settings
+-- [HY000][3167] The 'INFORMATION_SCHEMA.GLOBAL_VARIABLES' feature is disabled; see the documentation for 'show_compatibility_56'
 SELECT variable_value FROM information_schema.global_variables WHERE variable_name = 'innodb_buffer_pool_size';
 
+-- get interesting data on various details on the tables in a schema. cool.  rows + avg_row_length in particular
 SHOW TABLE status FROM imdb;
 
 
 
 
-SET @PowerOfTwo = 2;
-SET @GivenDB = 'imdb';
-SET @GivenTB = 'name_basics';
-SELECT COUNT(1) INTO @MyRowCount FROM imdb.name_basics;
-SELECT
-    index_name,SUM(column_length * @MyRowCount) indexentry_length
-FROM
-(
-    SELECT
-        index_name,column_name,
-        IFNULL(character_maximum_length,
-        IF(data_type='double',8,
-        IF(data_type='bigint',8,
-        IF(data_type='float',4,
-        IF(data_type='int',4,
-        IF(data_type='mediumint',3,
-        IF(data_type='smallint',2,
-        IF(data_type='datetime',4,
-        IF(data_type='date',3,
-        IF(data_type='tinyint',1,1)
-        ))))))))
-    ) / POWER(1024,@PowerOfTwo) column_length
-FROM
-(
-    SELECT
-        AAA.index_name,AAA.column_name,
-        BBB.data_type,coalesce(AAA.sub_part,BBB.character_maximum_length) AS character_maximum_length
-        FROM
-        (
-            SELECT table_schema,table_name,index_name,column_name,sub_part
-            FROM information_schema.statistics
-            WHERE table_schema = @GivenDB AND table_name = @GivenTB
-        ) AAA INNER JOIN
-        (
-            SELECT
-                table_schema,table_name,column_name,
-                character_maximum_length,data_type
-            FROM information_schema.columns
-            WHERE table_schema = @GivenDB AND table_name = @GivenTB
-        ) BBB USING (table_schema,table_name,column_name)
-    ) AA
-) A GROUP BY index_name;
 
-
-
+-- help to discover ideal size to set your database to actually perform this update without failing.
+-- run this ti determine number of gigabytes to set innodb_buffer_pool_size to in my.ini / my.cnf.
 SELECT CEILING(Total_InnoDB_Bytes*1.6/POWER(1024,3)) RIBPS FROM
 (SELECT SUM(data_length+index_length) Total_InnoDB_Bytes
 FROM information_schema.tables WHERE engine='InnoDB') A;
--- 6 --> 6GB!! okay! haha nice..
+-- output was "6"  --> which means set my innodb_buffer_pool_size to "6GB" in my "my.ini" file (my.cnf on unix).
 
 
 
@@ -271,5 +180,7 @@ ALTER IGNORE TABLE name_basics_test ADD UNIQUE (nconst, primaryName, birthYear, 
 select * from information_schema.STATISTICS where TABLE_SCHEMA = 'imdb';
 
 
+-- took 17 minutes to finish ~1 GB of unique migrating. cool.
 INSERT INTO name_basics_v2
 SELECT * FROM name_basics_test GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles; -- 6 minutes to check
+
