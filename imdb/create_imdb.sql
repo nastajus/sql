@@ -71,17 +71,19 @@ FROM information_schema.tables WHERE engine='InnoDB') A;
 -- ... by setting each birthYear = nullif and deathYear = nullif ...
 -- ... but really the fault originally lies with the raw data containing dupes.
 -- ... so ultimately not my fault originally, and i'm just learning to deal with it.
+-- ok so... type "INT" would exclude "\N" ... and result as null.
+-- ok so... i'll set to instead "VARCHAR(4)" instead...
 -- ugh. sigh.
 
 -- I've experimented with loading as each TEXT and VARCHAR... each has pros/cons.
 
-DROP TABLE IF EXISTS name_basics_with_dupes;
-CREATE TABLE name_basics_with_dupes (
+DROP TABLE IF EXISTS name_basics_test2;
+CREATE TABLE name_basics_test2 (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nconst VARCHAR(10),
     primaryName VARCHAR(128),
-    birthYear INT,
-    deathYear INT,
+    birthYear VARCHAR(4),
+    deathYear VARCHAR(4), -- NOT NULL DEFAULT '----', -- ACCIDENTALLY DOES THE JOB... FACE PALM
     primaryProfession VARCHAR(128),
     knownForTitles VARCHAR(128),
 
@@ -100,17 +102,25 @@ CREATE TABLE name_basics_with_dupes (
 
 
 -- clearly has duplicates often from very beginning... leaving for now...
-LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
+-- ok so... since the file itself contains duplicates...
+-- but i can apparently filter those out if i leave the raw string '\N' intact during load...
+-- lets try that now.
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/split500.name.basics.tsvaa' IGNORE
+-- LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
     -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
-    INTO TABLE name_basics_with_dupes
+    INTO TABLE name_basics_test2
     -- CHARACTER SET utf8
     FIELDS TERMINATED BY '\t'
+    ESCAPED BY '\\'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
 (nconst, primaryName, @vbirthYear, @vdeathYear, primaryProfession, knownForTitles)
 SET
-    birthYear = nullif(@vbirthYear, '\\N'),
-    deathYear = nullif(@vdeathYear, '\\N');
+    birthYear = if(@vbirthYear = null, 'pota', @vbirthYear),
+    deathYear = if(@vdeathYear = null, 'pota', @vdeathYear);
+
+
+
 
 ALTER TABLE name_basics MODIFY nconst VARCHAR(10);
 ALTER TABLE name_basics MODIFY primaryName VARCHAR(128);
