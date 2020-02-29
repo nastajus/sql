@@ -132,28 +132,6 @@ analyze table name_basics_test3; -- can help improve accuracy of `status` query.
 
 
 
--- detect any remaining duplicates
--- select count(*) from (
-SELECT *, count(nconst) as c
-FROM name_basics_test3
-GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles
-having c > 1
-;
--- ) as cc; -- result is 6338674 dupes still found, and in only 30 seconds!
-
-
--- 16352122 entries loaded raw with dupes.
--- 15847335 entries loaded with unique key filter...
---  6338674 dupes still found after unique key filter...
---        0 dupes found in "_clean" table...
---  9771478 entries in clean table...
-        -- biggest id : 9908614,  nconst: nm9993719
-
---  9898499 entries in test3 ... very close now... almost perfect...
-        -- biggest id : 9908614,  nconst: nm9993719
-
-
-
 
 -- extract small subset of data, cool.
 select titleId, ordering, title, region
