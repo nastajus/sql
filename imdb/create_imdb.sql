@@ -82,8 +82,16 @@ CREATE TABLE name_basics_test2 (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nconst VARCHAR(10),
     primaryName VARCHAR(128),
-    birthYear VARCHAR(4),
-    deathYear VARCHAR(4), -- NOT NULL DEFAULT '----', -- ACCIDENTALLY DOES THE JOB... FACE PALM
+
+    -- "\N" will be read as null, and converted implicitly to default of varchar, which is empty.
+    -- as long as strict mode isn't used, otherwise those records would produce errors and fail to load.
+    birthYear VARCHAR(4) NOT NULL,
+    deathYear VARCHAR(4) NOT NULL,
+
+    -- birthYear SMALLINT NOT NULL,
+    -- deathYear SMALLINT NOT NULL,
+
+
     primaryProfession VARCHAR(128),
     knownForTitles VARCHAR(128),
 
@@ -105,19 +113,23 @@ CREATE TABLE name_basics_test2 (
 -- ok so... since the file itself contains duplicates...
 -- but i can apparently filter those out if i leave the raw string '\N' intact during load...
 -- lets try that now.
-LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/split500.name.basics.tsvaa' IGNORE
 -- LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
-    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/split500.name.basics.tsvaa' IGNORE    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
     INTO TABLE name_basics_test2
     -- CHARACTER SET utf8
     FIELDS TERMINATED BY '\t'
-    ESCAPED BY '\\'
+    -- ESCAPED BY '\\' -- seemingly does nothing.
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-(nconst, primaryName, @vbirthYear, @vdeathYear, primaryProfession, knownForTitles)
-SET
-    birthYear = if(@vbirthYear = null, 'pota', @vbirthYear),
-    deathYear = if(@vdeathYear = null, 'pota', @vdeathYear);
+-- (nconst, primaryName, @vbirthYear, @vdeathYear, primaryProfession, knownForTitles)
+(nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
+ ;
+-- SET
+     -- none of my variations to set/if/assignment ... really seem to make any particular difference...
+     -- every iteration i've tried just always comes follows the 'false' clause -- = \N, = \\N, = null.
+--     birthYear = nullif(@vbirthYear, 'asdf'),
+--     deathYear = nullif(@vdeathYear, 'qwer');
+
 
 
 
