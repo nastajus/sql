@@ -82,8 +82,8 @@ FROM information_schema.tables WHERE engine='InnoDB') A;
 -- Therefore NOT NULL is included on as well on the 3 columns : birthYear, deathYear, and knownForTitles.
 -- Fourth, the order of `nconst` is 10% misordered due to string-based sorting. However this is simply ignored.
 
-DROP TABLE IF EXISTS name_basics_test3;
-CREATE TABLE name_basics_test3 (
+DROP TABLE IF EXISTS name_basics;
+CREATE TABLE name_basics (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
     -- looks fine for now, but might be too small ... soon or eventually.
@@ -103,10 +103,6 @@ CREATE TABLE name_basics_test3 (
 
     knownForTitles VARCHAR(128) NOT NULL,
 
-
-    -- This was valid only with VARCHAR and not TEXT, but i had errors loading with VARCHAR directly...
-    -- Suspect i just needed to boost `innodb_buffer_pool_size` from default 8 MB to ~ some GB in hindsight.
-
     -- Alone this still fails to filter 90% of duplicates due to nulls being considered unique by design.
     -- The remaining duplicates would all contain a null field, usually deathYear.
     -- Together with NOT NULL above, these work together to effectively filter out all duplicates.
@@ -118,13 +114,13 @@ CREATE TABLE name_basics_test3 (
 
 
 
--- Takes about 5 minutes to load this gigabyte. Cool.
+-- Takes about ~ 5 minutes to load this 1 gigabyte. Cool.
 LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
 -- LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/split500.name.basics.tsvaa' IGNORE    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
-    INTO TABLE name_basics_test3
+    INTO TABLE name_basics
     -- CHARACTER SET utf8
     FIELDS TERMINATED BY '\t'
-    -- ESCAPED BY '\\' -- seemingly does nothing.
+    -- ESCAPED BY '\\' -- seemingly does nothing, suspect is default.
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
 (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles);
@@ -136,12 +132,14 @@ analyze table name_basics_test3; -- can help improve accuracy of `status` query.
 
 
 
-select count(*) from (
+-- detect any remaining duplicates
+-- select count(*) from (
 SELECT *, count(nconst) as c
-FROM name_basics
+FROM name_basics_test3
 GROUP BY nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles
 having c > 1
-) as cc; -- result is 6338674 dupes still found, and in only 30 seconds!
+;
+-- ) as cc; -- result is 6338674 dupes still found, and in only 30 seconds!
 
 
 -- 16352122 entries loaded raw with dupes.
