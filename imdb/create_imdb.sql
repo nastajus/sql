@@ -8,7 +8,12 @@ CREATE SCHEMA IF NOT EXISTS imdb;
 USE imdb;
 
 -- helper to get useful details on the tables in a schema. Particularly `rows` & `avg_row_length`.
+-- However it is only an approximation, and have observed errors ranging 0.001 % to 3.63 %
+-- Hence was formerly favored when huge gaps were obvious, but with smaller gaps it's better to rely on count(*) instead.
 SHOW TABLE status FROM imdb;
+
+-- helper command-line to help evaluate long query duration (read very end parts to see ~rows/second rates)
+-- MYSQL>   SHOW ENGINE INNODB STATUS \G
 
 
 DROP TABLE IF EXISTS title_akas;
@@ -59,51 +64,48 @@ FROM information_schema.tables WHERE engine='InnoDB') A;
 
 
 
--- `name_basics` has some challenges to load cleanly.
+-- `name.basics.tsv` has some challenges to load cleanly.
 -- First, must increase default mysql pool size to from megabytes to gigabytes, or will likely fail critically to load.
 -- Second, understand ~41% entries from the raw CSV download are duplicates.
 -- so some additional filtering operations are necessary.
 -- Third, finally, unfortunately just using `UNIQUE KEY` is insufficient to filter out ~90% of duplicates,
 -- due to nulls being considered by design as "unique" and most actors birthYear being null.
 
--- :face-palm:
--- ... which I *partially* caused myself by converting `\N` to real `null`.
--- ... by setting each birthYear = nullif and deathYear = nullif ...
--- ... but really the fault originally lies with the raw data containing dupes.
--- ... so ultimately not my fault originally, and i'm just learning to deal with it.
--- ok so... type "INT" would exclude "\N" ... and result as null.
--- ok so... i'll set to instead "VARCHAR(4)" instead...
--- ugh. sigh.
 
--- I've experimented with loading as each TEXT and VARCHAR... each has pros/cons.
-
-DROP TABLE IF EXISTS name_basics_test2;
-CREATE TABLE name_basics_test2 (
+DROP TABLE IF EXISTS name_basics_test3;
+CREATE TABLE name_basics_test3 (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nconst VARCHAR(10),
     primaryName VARCHAR(128),
 
-    -- "\N" will be read as null, and converted implicitly to default of varchar, which is empty.
-    -- as long as strict mode isn't used, otherwise those records would produce errors and fail to load.
+    -- Raw "\N" will be read as <null>, and converted implicitly to default of varchar, which is <empty>.
+    -- As long as strict mode isn't used, otherwise those records would produce errors and fail to load.
+    -- The <empty> state is desirable for constraint `UNIQUE KEY` below to work:
+    -- together both NOT NULL combined with UNIQUE KEY (...) prevents the actual duplicates from loading,
+    -- as <null> is considered unique, but <empty> is not.
     birthYear VARCHAR(4) NOT NULL,
     deathYear VARCHAR(4) NOT NULL,
 
-    -- birthYear SMALLINT NOT NULL,
-    -- deathYear SMALLINT NOT NULL,
-
-
+    -- interestingly, this column actually exports truly <empty> instead as '\N' (<null>). So no need.
     primaryProfession VARCHAR(128),
-    knownForTitles VARCHAR(128),
+
+    knownForTitles VARCHAR(128) NOT NULL,
 
 
     -- This was valid only with VARCHAR and not TEXT, but i had errors loading with VARCHAR directly...
     -- Suspect i just needed to boost `innodb_buffer_pool_size` from default 8 MB to ~ some GB in hindsight.
-    -- However this still fails to filter 90% of duplicates due to nulls being considered unique by design.
-    -- The remaining duplicates should all contain a null field, usually deathYear.
-    -- Maybe should convert deathYear to a known empty string to better filter out duplicates on init load.
+
+    -- Alone this still fails to filter 90% of duplicates due to nulls being considered unique by design.
+    -- The remaining duplicates would all contain a null field, usually deathYear.
+    -- Together with NOT NULL above, these work together to effectively filter out all duplicates.
 
     UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
 );
+
+-- 9898499
+
+
+
 
 -- 5 minutes, works with good settings ! YAY.
 -- ok so... i tried loading with the unique index.. but i still get dupes.. just less.
@@ -113,9 +115,9 @@ CREATE TABLE name_basics_test2 (
 -- ok so... since the file itself contains duplicates...
 -- but i can apparently filter those out if i leave the raw string '\N' intact during load...
 -- lets try that now.
--- LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
-LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/split500.name.basics.tsvaa' IGNORE    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
-    INTO TABLE name_basics_test2
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
+-- LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/split500.name.basics.tsvaa' IGNORE    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
+    INTO TABLE name_basics_test3
     -- CHARACTER SET utf8
     FIELDS TERMINATED BY '\t'
     -- ESCAPED BY '\\' -- seemingly does nothing.
@@ -207,6 +209,10 @@ having c > 1
 --  6338674 dupes still found after unique key filter...
 --        0 dupes found in "_clean" table...
 --  9771478 entries in clean table...
+        -- biggest id : 9908614,  nconst: nm9993719
+
+--  9898499 entries in test3 ... very close now... almost perfect...
+        -- biggest id : 9908614,  nconst: nm9993719
 
 -- i made an assumption about how unique key worked
 -- i'd assumed by just adding a all the columns in one gigantic list it'll maximize uniqueness...
@@ -226,3 +232,77 @@ select titleId, ordering, title, region
 from imdb.title_akas
 where title like '%star trek%' and (region in ('US', '\\N') or region is NULL)
 INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/star-trek-us.tsv';
+
+
+-- invalid full join
+select * from name_basics_clean A
+full outer join name_basics_test2 B
+on a. ;
+
+
+-- attempt at full join.
+-- 1 hour to execute. way too long.
+SELECT *
+FROM `name_basics_clean` t1
+LEFT OUTER JOIN `name_basics_test2` t2 ON `t1`.`nconst` = `t2`.`nconst`
+
+UNION
+
+SELECT *
+FROM `name_basics_clean` t1
+RIGHT OUTER JOIN `name_basics_test2` t2 ON `t1`.`nconst` = `t2`.`nconst`
+WHERE `t1`.`nconst` IS NULL
+limit 10
+;
+
+
+-- help isolate where discrepancy begins...
+select * from
+(
+    SELECT nconst, CONVERT(SUBSTRING_INDEX(nconst,'nm',-1),UNSIGNED INTEGER) AS num, id
+    FROM name_basics_test3
+) as t
+where num != id
+and id > num -- bit of a shot in the dark... but works... cool...
+;
+-- ORDER BY num;
+
+
+
+-- didn't work as expected ... simply returns first 5 rows... blah.
+( select * from name_basics_test3 where nconst <= 'nm10086430' order by id limit 5 )
+union all
+  select * from name_basics_test3 where nconst >= 'nm10086430' order by id limit 5
+
+-- simpler ...
+-- hmm.. nothing really super useful discovered... maybe just many empty fields...
+select * from name_basics_test3 where nconst >= 'nm10086410' order by id limit 30
+
+-- left join find the unique fields in the larger table.
+select * from name_basics_test3 a
+left join name_basics_clean b on a.nconst = b.nconst
+where b.nconst is null;
+
+
+select count(*) from name_basics_clean; -- 9908614
+select count(*) from name_basics_test3; -- 9908614
+-- ok so.. effectively perfect.. so then... status is wrong????!?!?!?
+
+
+SHOW TABLE status FROM imdb;
+-- name_basics_clean	9771478     --however these are approximations... and _clean was especially modified... several times!
+-- name_basics_test3	9898499
+
+analyze table name_basics_clean;
+analyze table name_basics_test3;
+-- name_basics_clean	9548431     --well, jeez. didn't expect that.
+-- name_basics_test3	9705789     --well, dang. both shrunk.. ugh.
+
+-- rerunning above analyzes don't impact further. just that one time.
+
+-- errors of approximation from "status" check...
+-- 1 / 9908614 * 9771478 = 1.38%
+-- 1 / 9908614 * 9898499 = 0.001%
+-- 1 / 9908614 * 9548431 = 3.63 %
+-- 1 / 9908614 * 9705789 = 2.04 %
+-- sigh...
