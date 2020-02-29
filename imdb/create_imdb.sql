@@ -125,7 +125,7 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.
     IGNORE 1 LINES
 (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles);
 
-analyze table name_basics_test3; -- can help improve accuracy of `status` query.
+analyze table name_basics; -- can help improve accuracy of `status` query.
 
 
 
