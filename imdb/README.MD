@@ -5,7 +5,7 @@ COPIED FROM https://www.imdb.com/interfaces/
 **title.akas.tsv.gz**  - Contains the following information for titles:
 
 - titleId (string) - a tconst, an alphanumeric unique identifier of the title
-- rdering (integer) – a number to uniquely identify rows for a given titleId
+- ordering (integer) – a number to uniquely identify rows for a given titleId
 - title (string) – the localized title
 - region (string) - the region for this version of the title
 - language (string) - the language of the title
@@ -41,7 +41,7 @@ COPIED FROM https://www.imdb.com/interfaces/
 **title.principals.tsv.gz**  – Contains the principal cast/crew for titles
 
 - tconst (string) - alphanumeric unique identifier of the title
-- rdering (integer) – a number to uniquely identify rows for a given titleId
+- ordering (integer) – a number to uniquely identify rows for a given titleId
 - nconst (string) - alphanumeric unique identifier of the name/person
 - category (string) - the category of job that person was in
 - job (string) - the specific job title if applicable, else &#39;\N&#39;
@@ -73,7 +73,7 @@ TRANSFORMED INTO TABLE FORMAT
 **title.akas.tsv.gz** 
 
 - titleId (string)
-- rdering (integer)
+- ordering (integer)
 - title (string)
 - region (string)
 - language (string)
@@ -109,7 +109,7 @@ TRANSFORMED INTO TABLE FORMAT
 **title.principals.tsv.gz** 
 
 - tconst (string)
-- rdering (integer)
+- ordering (integer)
 - nconst (string)
 - category (string)
 - job (string)
@@ -140,11 +140,11 @@ ALMOST DONE
 
 title_akas
 
-- titleId VARCHAR(10) NOT NULL -- tt0000001
-- ordering TEXT
-- title TEXT
-- region VARCHAR(8)
-- language TEXT
-- types TEXT
-- attributes TEXT
+- titleId VARCHAR(10) NOT NULL, -- tt0000001
+- ordering TEXT,
+- title TEXT,
+- region VARCHAR(8),
+- language TEXT,
+- types TEXT,
+- attributes TEXT,
 - isOriginalTitle BOOLEAN -- NOT NULL

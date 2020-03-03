@@ -130,9 +130,6 @@ analyze table name_basics; -- can help improve accuracy of `status` query.
 
 
 
-
-
-
 DROP TABLE IF EXISTS title_crew;
 CREATE TABLE title_crew (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -154,19 +151,50 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.crew.tsv/title.crew.ts
 (tconst, directors, writers);
 
 
--- check for duplicates in new table load, given high prominence in last table data set.
--- thankfully, none found.
-SELECT *, count(tconst) as c
-FROM title_crew
-GROUP BY tconst, directors, writers
-having c > 1
-;
+
+
+DROP TABLE IF EXISTS title_principals;
+CREATE TABLE title_principals (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+
+    -- ahh interesting, this is normalized data...
+    tconst VARCHAR(10),
+    ordering TINYINT,
+    nconst VARCHAR(10),
+    category VARCHAR(32),
+    job VARCHAR(64),
+    characters VARCHAR(64)
+);
+
+-- Takes about ~ 5 minute to load this ~ 1.5 GB.  Cool.
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.principals.tsv/title.principals.tsv' IGNORE
+    INTO TABLE title_principals
+    FIELDS TERMINATED BY '\t'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+(tconst, ordering, nconst, category, job, characters);
 
 
 
--- tconst	ordering	nconst	category	job	characters
 
 
+
+DROP TABLE IF EXISTS title_ratings;
+CREATE TABLE title_ratings (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+
+    tconst VARCHAR(10),
+    averageRating FLOAT, -- "average"
+    numVotes INT -- "votes"
+);
+
+-- Takes about ~ 5 seconds  to load this ~ 20 MB.  Quick.
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.ratings.tsv/title.ratings.tsv' IGNORE
+    INTO TABLE title_ratings
+    FIELDS TERMINATED BY '\t'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+(tconst, averageRating, numVotes);
 
 
 
