@@ -133,8 +133,55 @@ analyze table name_basics; -- can help improve accuracy of `status` query.
 
 
 
+DROP TABLE IF EXISTS title_crew;
+CREATE TABLE title_crew (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+
+    -- seems like no dupes at a glance... presuming can skip NOT NULL clause...
+    tconst VARCHAR(10),
+    directors VARCHAR(128), -- quick guess
+    writers VARCHAR(128) -- quick guess
+
+    -- UNIQUE KEY ix_title_crew (tconst, directors, writers)
+);
+
+-- Takes about 1/2 minute to load this ~ 200 MB.  Cool.
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.crew.tsv/title.crew.tsv' IGNORE
+    INTO TABLE title_crew
+    FIELDS TERMINATED BY '\t'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+(tconst, directors, writers);
+
+
+-- check for duplicates in new table load, given high prominence in last table data set.
+-- thankfully, none found.
+SELECT *, count(tconst) as c
+FROM title_crew
+GROUP BY tconst, directors, writers
+having c > 1
+;
+
+
+
+-- tconst	ordering	nconst	category	job	characters
+
+
+
+
+
+
 -- extract small subset of data, cool.
 select titleId, ordering, title, region
 from imdb.title_akas
 where title like '%star trek%' and (region in ('US', '\\N') or region is NULL)
 INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/star-trek-us.tsv';
+
+
+select titleId, ordering, title, region
+from imdb.title_akas
+where title like '%critical role%' and title not like '%sharks play%' -- and (region in ('US', '\\N') or region is NULL);
+INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/critical-role.tsv';
+
+
+
