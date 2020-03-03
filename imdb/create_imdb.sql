@@ -125,13 +125,13 @@ analyze table name_basics; -- can help improve accuracy of `status` query.
 
 
 
--- ~2 minutes
+-- has taken ~2-3 minutes
 ALTER TABLE name_basics
     MODIFY birthYear VARCHAR(4),
     MODIFY deathYear VARCHAR(4),
     MODIFY knownForTitles VARCHAR(128);
 
--- ~ 3 minutes
+--  has taken between ~ 3-8 minutes
 UPDATE
     name_basics
 SET
