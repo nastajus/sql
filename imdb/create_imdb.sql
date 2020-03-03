@@ -110,10 +110,6 @@ CREATE TABLE name_basics (
     UNIQUE KEY ix_name_basics (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles)
 );
 
-
-
-
-
 -- Takes about ~ 5 minutes to load this 1 gigabyte. Cool.
 LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.tsv' IGNORE
 -- LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/split500.name.basics.tsvaa' IGNORE    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
@@ -126,6 +122,25 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/name.basics.tsv/name.basics.
 (nconst, primaryName, birthYear, deathYear, primaryProfession, knownForTitles);
 
 analyze table name_basics; -- can help improve accuracy of `status` query.
+
+
+
+-- ~2 minutes
+ALTER TABLE name_basics
+    MODIFY birthYear VARCHAR(4),
+    MODIFY deathYear VARCHAR(4),
+    MODIFY knownForTitles VARCHAR(128);
+
+-- ~ 3 minutes
+UPDATE
+    name_basics
+SET
+    birthYear = CASE birthYear WHEN '' THEN NULL ELSE birthYear END,
+    deathYear = CASE deathYear WHEN '' THEN NULL ELSE deathYear END,
+    knownForTitles = CASE knownForTitles WHEN '' THEN NULL ELSE knownForTitles END;
+
+
+
 
 
 
