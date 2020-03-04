@@ -18,36 +18,15 @@ SHOW TABLE status FROM imdb;
 -- another helper query, check out `cardinality`.
 select * from information_schema.STATISTICS where TABLE_SCHEMA = 'imdb';
 
+SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'imdb' AND COLUMN_NAME = 'title'; -- AND TABLE_NAME = 'Table' AND COLUMN_NAME = 'Field';
+
+SELECT MAX(LENGTH(title)) FROM imdb.title_akas limit 1; -- 831 wow.
+
 
 
 -- helper command-line to help evaluate long query duration (read very end parts to see ~rows/second rates)
 -- MYSQL>   SHOW ENGINE INNODB STATUS \G
 
-
-DROP TABLE IF EXISTS title_akas;
-CREATE TABLE title_akas (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    titleId TEXT NOT NULL,
-    ordering TEXT,
-    title TEXT,
-    region VARCHAR(8),
-    language TEXT,
-    types TEXT,
-    attributes TEXT,
-    isOriginalTitle BOOLEAN
-);
-
--- convert raw IMBd downloaded CSV to UTF8 first using Notepad++ or KainetEditor for example.
-LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/title.akas.utf8.tsv' IGNORE
-    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
-    INTO TABLE title_akas
-    CHARACTER SET utf8
-    FIELDS TERMINATED BY '\t'
-    LINES TERMINATED BY '\n'
-    IGNORE 1 LINES
-(titleId, ordering, title, region, language, types, attributes, isOriginalTitle);
-
-analyze table title_akas; -- can help improve accuracy of `status` query.
 
 
 
@@ -145,6 +124,35 @@ SET
 
 
 
+DROP TABLE IF EXISTS title_akas;
+CREATE TABLE title_akas (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    titleId VARCHAR(10) NOT NULL,
+    ordering TEXT,
+    title VARCHAR(1024),
+    region VARCHAR(8),
+    language TEXT,
+    types TEXT,
+    attributes TEXT,
+    isOriginalTitle BOOLEAN
+);
+
+-- convert raw IMBd downloaded CSV to UTF8 first using Notepad++ or KainetEditor for example.
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/title.akas.utf8.tsv' IGNORE
+    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
+    INTO TABLE title_akas
+    CHARACTER SET utf8
+    FIELDS TERMINATED BY '\t'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+(titleId, ordering, title, region, language, types, attributes, isOriginalTitle);
+
+analyze table title_akas; -- can help improve accuracy of `status` query.
+
+
+
+
+
 DROP TABLE IF EXISTS title_crew;
 CREATE TABLE title_crew (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -227,4 +235,4 @@ where title like '%critical role%' and title not like '%sharks play%' -- and (re
 INTO OUTFILE 'D:/[[TO QUERY]]/IMDb/[2020-02-22]/title.akas.tsv/critical-role.tsv';
 
 
-
+alter table title_akas modify titleId VARCHAR(10) not null;
