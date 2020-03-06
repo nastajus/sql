@@ -1,0 +1,65 @@
+Find:
+Attempts: 
+
+	• (season|volume){1}      -- misleading due to highlighting
+	• \b(Season | Part ){1}\b -- actually useful !  ... until not!! 
+	• ((^.*): Season [\d]+|(^.*): Part [\d]+) -- \1 exterior, \2 interior... etc.
+		((^.*): (Season [\d]+.*)|(^.*): (Part [\d]+.*))
+			o --> ignore /1
+			o --> use /2    -- show title only
+			o --> use /3    -- everything else after title.
+
+Sublime tricks:
+	- 1) find all regex matches
+	- 2) press alt-enter to select
+	- 3) move out to another file... etc.
+
+
+((^.*): Season [\d]+|(^.*): Part [\d]+|(^.*): Volume [\d]+|(^.*): Series [\d]+|(^.*): Chapter [\d]+|(^.*): Book [\d]+|(^.*): Episode [\d]+|(^.*): Limited Series|(^.*): Stranger Things 2|(^.*): Book One|(^.*): Book Two|(^.*): Book Three|(^.*): Book Four).*
+
+
+(.*: (Season [\d]+)|.*: (Part [\d]+)|.*: (Volume [\d]+)|.*: (Series [\d]+)|.*: (Chapter [\d]+)|.*: (Book [\d]+)|.*: (Episode [\d]+)|.*: (Limited Series)|.*: (Stranger Things 2)|.*: (Book One)|.*: (Book Two)|.*: (Book Three)|.*: (Book Four)).*
+
+
+
+(
+: Season [\d]+|
+: Part [\d]+|
+: Volume [\d]+|
+: Series [\d]+|
+: Chapter [\d]+|
+: Book [\d]+|
+: Episode [\d]+
+){1}$
+
+
+Fuck:
+line 242: "The Order: Season 1: Hell Week: Part 1","3/16/19"
+
+
+some ideas... meh
+	https://stackoverflow.com/questions/247167/exclusive-or-in-regular-expression
+	https://stackoverflow.com/questions/48465393/regex-matching-only-first-occurrence-per-line
+	https://stackoverflow.com/questions/8374742/regex-last-occurrence
+	
+
+last occurance!
+	• :(?:.(?!:))+$
+
+date format!
+	• (.*)(,"[\d]+\/[\d]+\/[\d]+")
+
+
+find:
+	: (season [\d]+): (.*)(,"[\d]+\/[\d]+\/[\d]+")
+	: (book [\d]+): (.*)(,"[\d]+\/[\d]+\/[\d]+")
+
+	(part [\d]+): (.*)(,"[\d]+\/[\d]+\/[\d]+")
+	^"[^avatar].*: (part [\d]+): (.*)(,"[\d]+\/[\d]+\/[\d]+")
+
+	(volume [\d]+): (.*)(,"[\d]+\/[\d]+\/[\d]+")
+	(series [\d]+): (.*)(,"[\d]+\/[\d]+\/[\d]+")
+
+	   ... etc
+replace:
+	", "\1", "\2 \3
