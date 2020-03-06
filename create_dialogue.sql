@@ -4,8 +4,8 @@
 -- C:\ProgramData\MySQL\MySQL Server 5.7\Uploads\
 
 
-CREATE SCHEMA IF NOT EXISTS fiction;
-USE fiction;
+CREATE SCHEMA IF NOT EXISTS dialogue;
+USE dialogue;
 
 DELIMITER $$
 DROP FUNCTION  IF EXISTS `proper_case`;
