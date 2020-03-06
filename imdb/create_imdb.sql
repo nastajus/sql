@@ -153,6 +153,34 @@ analyze table title_akas; -- can help improve accuracy of `status` query.
 
 
 
+
+DROP TABLE IF EXISTS title_basics;
+CREATE TABLE title_basics (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    tconst VARCHAR(10),
+    titleType VARCHAR(16),
+    primaryTitle VARCHAR(1024),
+    originalTitle VARCHAR(1024),
+    isAdult BOOL,
+    startYear SMALLINT DEFAULT NULL,
+    endYear SMALLINT DEFAULT NULL,
+    runtimeMinutes TINYINT DEFAULT NULL,
+    genres VARCHAR(64)
+);
+LOAD DATA INFILE 'D:/[[TO QUERY]]/IMDb/[2020-03-03]/title.basics.tsv/title.basics.tsv' IGNORE
+    -- 'C:/ProgramData/MySQL/MySQL Server 5.7/Uploads/scripts/ ... .csv'
+    INTO TABLE title_basics
+    CHARACTER SET utf8
+    FIELDS TERMINATED BY '\t'
+    LINES TERMINATED BY '\n'
+    IGNORE 1 LINES
+(tconst, titleType, primaryTitle, originalTitle, isAdult, startYear, endYear, runtimeMinutes, genres);
+
+analyze table title_basics; -- can help improve accuracy of `status` query.
+
+
+
+
 DROP TABLE IF EXISTS title_crew;
 CREATE TABLE title_crew (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
