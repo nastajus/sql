@@ -25,12 +25,13 @@ CREATE TABLE ca_element
 
 LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/canada/naics-scian-2017-element-v3-eng.csv' IGNORE
     INTO TABLE ca_element
-    CHARACTER SET latin1 -- solves issue importing
+    CHARACTER SET latin1
     FIELDS TERMINATED BY ','
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\r\n'
     IGNORE 1 LINES
     (@skipLevel, code, classTitle, typeLabel, description);
+
 
 
 DROP TABLE IF EXISTS ca_structure;
@@ -52,18 +53,124 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/canada/naics-scian-2017-structure-v3-eng
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\r\n'
     IGNORE 1 LINES
-(Level, HierarchicalStructure, Code, ClassTitle, Superscript, ClassDefinition);
+    (Level, HierarchicalStructure, Code, ClassTitle, Superscript, ClassDefinition);
 
-DROP TABLE IF EXISTS ca_element;
-CREATE TABLE ca_element
+
+
+DROP TABLE IF EXISTS us_2_6_digit_codes;
+CREATE TABLE us_2_6_digit_codes
 (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-
+    id    INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    -- SeqNo - skip
+    code  VARCHAR(6),
+    title VARCHAR(128)
 );
 
-DROP TABLE IF EXISTS ca_element;
-CREATE TABLE ca_element
-(
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+-- converted xlsx to tsv, as easiest to copy-paste (save-as wasn't working...)
+LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/us/2-6 digit_2017_Codes.tsv' IGNORE
+    INTO TABLE us_2_6_digit_codes
+    -- CHARACTER SET latin1
+    FIELDS TERMINATED BY '\t'
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 1 LINES
+    (@skipSeqNo, code, title);
 
+
+
+DROP TABLE IF EXISTS us_6_digit_codes;
+CREATE TABLE us_6_digit_codes
+(
+    id    INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    code  VARCHAR(6),
+    title VARCHAR(128)
 );
+
+-- converted xlsx to tsv, as easiest to copy-paste (save-as wasn't working...)
+LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/us/6-digit_2017_Codes.tsv' IGNORE
+    INTO TABLE us_6_digit_codes
+    FIELDS TERMINATED BY '\t'
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 1 LINES
+    (code, title);
+
+
+
+DROP TABLE IF EXISTS us_cross_reference;
+CREATE TABLE us_cross_reference
+(
+    id        INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    code      VARCHAR(6),
+    reference VARCHAR(512)
+);
+
+-- converted xlsx to tsv, as easiest to copy-paste (save-as wasn't working...)
+LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/us/2017_NAICS_Cross_References.tsv' IGNORE
+    INTO TABLE us_cross_reference
+    FIELDS TERMINATED BY '\t'
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 1 LINES
+    (code, reference);
+
+
+
+DROP TABLE IF EXISTS us_descriptions;
+CREATE TABLE us_descriptions
+(
+    id          INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    code        VARCHAR(6),
+    title       VARCHAR(128),
+    description VARCHAR(8192)
+);
+
+-- converted xlsx to tsv, as easiest to copy-paste (save-as wasn't working...)
+-- this lost the superscript indicator, instead just appending "T" to the end of all titles. :/
+LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/us/2017_NAICS_Descriptions.tsv' IGNORE
+    INTO TABLE us_descriptions
+    FIELDS TERMINATED BY '\t'
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 1 LINES
+    (code, title, description);
+
+
+
+DROP TABLE IF EXISTS us_index_file;
+CREATE TABLE us_index_file
+(
+    id          INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    code        VARCHAR(6),
+    description VARCHAR(256) -- (includes ****** at end)
+);
+
+-- converted xlsx to tsv, as easiest to copy-paste (save-as wasn't working...)
+LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/us/2017_NAICS_Index_File.tsv' IGNORE
+    INTO TABLE us_index_file
+    FIELDS TERMINATED BY '\t'
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 1 LINES
+    (code, description);
+
+
+
+DROP TABLE IF EXISTS us_structure;
+CREATE TABLE us_structure
+(
+    id        INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    indicator VARCHAR(2),
+    code      VARCHAR(6),
+    title     VARCHAR(128)
+);
+
+-- converted xlsx to tsv, as easiest to copy-paste (save-as wasn't working...)
+-- this lost the superscript indicator, instead just appending "T" to the end of all titles. :/
+LOAD DATA INFILE 'D:/[[TO QUERY]]/NAICS/us/2017_NAICS_Structure.tsv' IGNORE
+    INTO TABLE us_structure
+    FIELDS TERMINATED BY '\t'
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\r\n'
+    IGNORE 1 LINES
+    (indicator, code, title);
