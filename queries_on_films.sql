@@ -100,18 +100,23 @@ where tconst = 'tt1051906';
 -- select primaryTitle, p.* from title_basics b
 -- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters  title_basics b
 -- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters, n.* from title_basics b
-    select primaryTitle,
+    select b.primaryTitle,
            p.tconst, p.nconst,
            n.primaryName,
            p.category, p.job, p.characters,
            n.birthYear, n.deathYear, n.primaryProfession,
-           j.knownForTitles from title_basics b
+           j.knownForTitle,
+           bb.primaryTitle as otherPrimaryTitle
+    from title_basics b
 join imdb.title_principals p
     on b.tconst = p.tconst
 join imdb.name_basics n
     on n.nconst = p.nconst
 join json_table(
   concat('[', replace(json_quote(n.knownForTitles), ',', '","'), ']'),
-  '$[*]' columns (knownForTitles varchar(64) path '$')
+  '$[*]' columns (knownForTitle varchar(64) path '$')
 ) j
+join title_basics bb
+    on j.knownForTitle = bb.tconst
 where b.tconst = 'tt1051906';
+-- ERROR : [42000][1066] Not unique table/alias: 'b'
