@@ -104,10 +104,14 @@ where tconst = 'tt1051906';
            p.tconst, p.nconst,
            n.primaryName,
            p.category, p.job, p.characters,
-           n.birthYear, n.deathYear, n.primaryProfession, 
-           n.knownForTitles from title_basics b
+           n.birthYear, n.deathYear, n.primaryProfession,
+           j.knownForTitles from title_basics b
 join imdb.title_principals p
     on b.tconst = p.tconst
 join imdb.name_basics n
     on n.nconst = p.nconst
+join json_table(
+  concat('[', replace(json_quote(n.knownForTitles), ',', '","'), ']'),
+  '$[*]' columns (knownForTitles varchar(64) path '$')
+) j
 where b.tconst = 'tt1051906';
