@@ -1,14 +1,3 @@
-CREATE SCHEMA IF NOT EXISTS shows;
-USE shows;
-
-DROP VIEW vw_trakt_shows;
-CREATE VIEW vw_trakt_shows AS
-    SELECT title, ids_imdb as imdb, status, type FROM trakt.watched_movies
-    UNION
-    SELECT title, ids_imdb as imdb, status, type FROM trakt.watchlist_movies
-    UNION
-    SELECT title, ids_imdb as imdb, status, type FROM trakt.watchlist_shows;
-
 
 SELECT title, count(title) as frequency FROM netflix.viewing_history
 GROUP BY title HAVING frequency > 1;
@@ -72,3 +61,4 @@ SELECT DISTINCT  n.title, ta.titleId as imdb FROM netflix.viewing_history n
 left JOIN imdb.title_akas ta on ta.title = n.title
 where ta.region = 'US') as tt
 left join imdb.name_basics nb on nb.knownForTitles
+

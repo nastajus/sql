@@ -104,6 +104,7 @@ analyze table name_basics; -- can help improve accuracy of `status` query.
 
 
 
+-- this doubles file size from ~1.5 GB to ~2.7 GB
 -- has taken ~2-3 minutes
 ALTER TABLE name_basics
     MODIFY birthYear VARCHAR(4),
