@@ -137,15 +137,13 @@ where b.tconst = 'tt1051906';
 
 -- https://stackoverflow.com/questions/5287246/mysql-join-and-exclude
 -- really good example scenario... shows optimization value and gives simpler/slower one anyways...
-
--- ** a film's people's roles ... BUILDS "OTHER PRIMARY PROFESSIONS" now...
+-- ** a film's people's roles ... and their 'other' primary professions.
      select b.primaryTitle,
             p.tconst, p.nconst,
             n.primaryName,
             p.category, p.job, p.characters,
-            n.birthYear, n.deathYear, n.primaryProfession,
-            -- j.eachPrimaryProfession
-            group_concat(j.eachPrimaryProfession separator ',') as otherPrimaryProfessions
+            group_concat(j.eachPrimaryProfession separator ',') as otherPrimaryProfessions,
+            n.birthYear, n.deathYear
     from title_basics b
 join imdb.title_principals p
     on b.tconst = p.tconst
