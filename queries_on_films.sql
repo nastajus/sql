@@ -96,9 +96,13 @@ join name_basics n
     on p.nconst = n.nconst
 where tconst = 'tt1051906';
 
+-- **  gets cast for a title. **
 -- select primaryTitle, p.* from title_basics b
 -- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters  title_basics b
-select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters, n.* from title_basics b
+-- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters, n.* from title_basics b
+    select primaryTitle,
+           p.tconst, p.nconst, p.category, p.job, p.characters,
+           n.primaryName, n.birthYear, n.deathYear, n.primaryProfession from title_basics b
 join imdb.title_principals p
     on b.tconst = p.tconst
 join imdb.name_basics n
