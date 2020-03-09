@@ -44,7 +44,8 @@ join json_table(
 
 
 
-
+-- yorgos lanthimos queries:
+-- ======================== --
 -- works, actually... just needed to upgrade from mysql 5.x to 8.x. woot!
 -- https://stackoverflow.com/questions/17942508/sql-split-values-to-multiple-rows
 -- select t.nconst, t.primaryName, t.primaryProfession, j.knownForTitles from imdb.name_basics t
@@ -74,3 +75,23 @@ where primaryName like 'yorgos lanthimos'
 ) s
 join title_basics
 where tconst = knownTitleId;
+
+
+
+-- invisible man queries:
+-- ====================== --
+select * from imdb.title_basics t
+where (primaryTitle like '%invisible man%' or originalTitle like '%invisible man%')
+  and titleType like '%movie%'
+and startYear = 2020;
+
+select * from imdb.title_basics t where tconst = 'tt1051906';
+
+-- attempt to extract *SOME* cast members... but not really what i want:...
+select * from imdb.title_crew t where tconst = 'tt1051906';
+select * from imdb.title_principals t where tconst = 'tt1051906';
+
+select p.nconst, category, job, characters, n.* from imdb.title_principals p
+join name_basics n
+    on p.nconst = n.nconst
+where tconst = 'tt1051906';
