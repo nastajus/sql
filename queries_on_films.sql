@@ -144,7 +144,8 @@ where b.tconst = 'tt1051906';
             n.primaryName,
             p.category, p.job, p.characters,
             n.birthYear, n.deathYear, n.primaryProfession,
-            j.eachPrimaryProfession as otherPrimaryProfessions
+            -- j.eachPrimaryProfession
+            group_concat(j.eachPrimaryProfession separator ',') as otherPrimaryProfessions
     from title_basics b
 join imdb.title_principals p
     on b.tconst = p.tconst
@@ -155,4 +156,5 @@ join json_table(
   '$[*]' columns (eachPrimaryProfession varchar(64) path '$')
 ) j
 where j.eachPrimaryProfession != p.category
-  and b.tconst = 'tt1051906';
+  and b.tconst = 'tt1051906'
+group by p.nconst;
