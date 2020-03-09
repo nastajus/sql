@@ -101,12 +101,13 @@ where tconst = 'tt1051906';
 -- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters  title_basics b
 -- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters, n.* from title_basics b
     select primaryTitle,
-           p.tconst, p.nconst, p.category, p.job, p.characters,
-           n.primaryName, n.birthYear, n.deathYear, n.primaryProfession from title_basics b
+           p.tconst, p.nconst,
+           n.primaryName,
+           p.category, p.job, p.characters,
+           n.birthYear, n.deathYear, n.primaryProfession, 
+           n.knownForTitles from title_basics b
 join imdb.title_principals p
     on b.tconst = p.tconst
 join imdb.name_basics n
     on n.nconst = p.nconst
--- join imdb.name_basics n
-   -- on n.nconst = p.nconst
 where b.tconst = 'tt1051906';
