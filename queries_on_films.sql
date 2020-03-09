@@ -64,7 +64,7 @@ select * from json_table
 
 
 
-select * from (
+select nameId, primaryName, knownTitleId, titleType, primaryTitle, startYear, genres from (
 select nconst as nameId, primaryName, primaryProfession, j.knownForTitles as knownTitleId from imdb.name_basics t
 join json_table(
   concat('[', replace(json_quote(t.knownForTitles), ',', '","'), ']'),
@@ -73,4 +73,4 @@ join json_table(
 where primaryName like 'yorgos lanthimos'
 ) s
 join title_basics
-where tconst = knownTitleId
+where tconst = knownTitleId;
