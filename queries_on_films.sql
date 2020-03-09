@@ -96,10 +96,7 @@ join name_basics n
     on p.nconst = n.nconst
 where tconst = 'tt1051906';
 
--- **  gets cast for a title. **
--- select primaryTitle, p.* from title_basics b
--- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters  title_basics b
--- select primaryTitle, p.tconst, p.nconst, p.category, p.job, p.characters, n.* from title_basics b
+-- **  gets cast for a title, and their other popular titles! **
     select b.primaryTitle,
            p.tconst, p.nconst,
            n.primaryName,
@@ -119,4 +116,18 @@ join json_table(
 join title_basics bb
     on j.knownForTitle = bb.tconst
 where b.tconst = 'tt1051906';
--- ERROR : [42000][1066] Not unique table/alias: 'b'
+
+
+-- ** a film's principal roles of it's people & their birth, death, and profession **
+-- principal roles include: (actors/etc, producer, composer, cinematographers, writer, directors)
+    select b.primaryTitle,
+           p.tconst, p.nconst,
+           n.primaryName,
+           p.category, p.job, p.characters,
+           n.birthYear, n.deathYear, n.primaryProfession
+    from title_basics b
+join imdb.title_principals p
+    on b.tconst = p.tconst
+join imdb.name_basics n
+    on n.nconst = p.nconst
+where b.tconst = 'tt1051906';
