@@ -18,23 +18,11 @@ select nconst, primaryName, primaryProfession, knownForTitles from imdb.name_bas
 
 use imdb;
 
--- works, actually... just needed to upgrade from mysql 5.x to 8.x. woot!
--- https://stackoverflow.com/questions/17942508/sql-split-values-to-multiple-rows
--- select t.nconst, t.primaryName, t.primaryProfession, j.knownForTitles from imdb.name_basics t
-select nconst, primaryName, primaryProfession, j.knownForTitles from imdb.name_basics t
-join json_table(
-  concat('[', replace(json_quote(t.knownForTitles), ',', '","'), ']'),
-  '$[*]' columns (knownForTitles varchar(64) path '$')
-) j
-where primaryName like 'yorgos lanthimos';
-
-select * from json_table
-(
-    concat('[', replace (json_quote(imdb.name_basics.knownForTitles), ',', '","'), ']')
-);
--- SELECT * FROM imdb.name_basics WHERE knownForTitles REGEXP '\b1\b'
 
 
+
+
+-- how to query csv list with json_table ! (needs mysql 8.0.4 at least)
 
 CREATE TABLE mytable (
   `id` INTEGER,
@@ -54,3 +42,35 @@ join json_table(
   '$[*]' columns (`name` varchar(50) path '$')
 ) j;
 
+
+
+
+-- works, actually... just needed to upgrade from mysql 5.x to 8.x. woot!
+-- https://stackoverflow.com/questions/17942508/sql-split-values-to-multiple-rows
+-- select t.nconst, t.primaryName, t.primaryProfession, j.knownForTitles from imdb.name_basics t
+select nconst, primaryName, primaryProfession, j.knownForTitles from imdb.name_basics t
+join json_table(
+  concat('[', replace(json_quote(t.knownForTitles), ',', '","'), ']'),
+  '$[*]' columns (knownForTitles varchar(64) path '$')
+) j
+where primaryName like 'yorgos lanthimos';
+
+select * from json_table
+(
+    concat('[', replace (json_quote(imdb.name_basics.knownForTitles), ',', '","'), ']')
+);
+-- SELECT * FROM imdb.name_basics WHERE knownForTitles REGEXP '\b1\b'
+
+
+
+
+select * from (
+select nconst as nameId, primaryName, primaryProfession, j.knownForTitles as knownTitleId from imdb.name_basics t
+join json_table(
+  concat('[', replace(json_quote(t.knownForTitles), ',', '","'), ']'),
+  '$[*]' columns (knownForTitles varchar(64) path '$')
+) j
+where primaryName like 'yorgos lanthimos'
+) s
+join title_basics
+where tconst = knownTitleId
