@@ -118,16 +118,41 @@ join title_basics bb
 where b.tconst = 'tt1051906';
 
 
+-- ** film's people's roles, plus... **
 -- ** a film's principal roles of it's people & their birth, death, and profession **
 -- principal roles include: (actors/etc, producer, composer, cinematographers, writer, directors)
-    select b.primaryTitle,
-           p.tconst, p.nconst,
-           n.primaryName,
-           p.category, p.job, p.characters,
-           n.birthYear, n.deathYear, n.primaryProfession
+     select b.primaryTitle,
+            p.tconst, p.nconst,
+            n.primaryName,
+            p.category, p.job, p.characters,
+            n.birthYear, n.deathYear, n.primaryProfession
     from title_basics b
 join imdb.title_principals p
     on b.tconst = p.tconst
 join imdb.name_basics n
     on n.nconst = p.nconst
 where b.tconst = 'tt1051906';
+
+
+
+-- https://stackoverflow.com/questions/5287246/mysql-join-and-exclude
+-- really good example scenario... shows optimization value and gives simpler/slower one anyways...
+
+-- ** a film's people's roles ... BUILDS "OTHER PRIMARY PROFESSIONS" now...
+     select b.primaryTitle,
+            p.tconst, p.nconst,
+            n.primaryName,
+            p.category, p.job, p.characters,
+            n.birthYear, n.deathYear, n.primaryProfession,
+            j.eachPrimaryProfession as otherPrimaryProfessions
+    from title_basics b
+join imdb.title_principals p
+    on b.tconst = p.tconst
+join imdb.name_basics n
+    on n.nconst = p.nconst
+join json_table(
+  concat('[', replace(json_quote(n.primaryProfession), ',', '","'), ']'),
+  '$[*]' columns (eachPrimaryProfession varchar(64) path '$')
+) j
+where j.eachPrimaryProfession != p.category
+  and b.tconst = 'tt1051906';
