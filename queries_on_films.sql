@@ -164,7 +164,11 @@ group by p.nconst;
 
 --  find actor in specific genres only
 -- this version takes 3m30s long... sigh ... for 122 results.
-select n.nconst, n.primaryName, p.* from imdb.name_basics n
+select n.nconst, n.primaryName, b.primaryTitle, p.tconst, p.category, p.job, p.characters,
+       b.genres
+from imdb.name_basics n
 join title_principals p
     on n.nconst = p.nconst
+join title_basics b
+    on p.tconst = b.tconst
     where primaryName like 'rachel weisz'
