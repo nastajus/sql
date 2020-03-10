@@ -1,14 +1,22 @@
+Contains an evolving collection of a few independent schemas and queries. Currently composed of two major genres: films in IMDb and employment industries in NAICS.
+
 Setup
 ====
 
-* Requires [MySQL](https://dev.mysql.com/downloads/mysql/) installed. Used [DataGrip](https://www.jetbrains.com/datagrip/) mainly & [phpMyAdmin](https://www.phpmyadmin.net/) briefly to view, apply, manipulate. Alternatively [CLI](https://dev.mysql.com/doc/mysql-getting-started/en/) works too.
-* Clone, connect, run.
-* Voila, data.
+* Requires [MySQL](https://dev.mysql.com/downloads/mysql/) installed, ideally 8.0.4+ in some cases. 
+* Any MySQL tool. I significantly prefer [DataGrip](https://www.jetbrains.com/datagrip/), but [phpMyAdmin](https://www.phpmyadmin.net/), [MySQL Workbench](https://www.mysql.com/products/workbench/) or even the [CLI](https://dev.mysql.com/doc/refman/8.0/en/mysql.html) works too.
+* Choose your dataset to work with 
+* Films use trakt, netflix, IMDb, and industry codes uses NAICS from each US and Canada sources.
+  * If using IMDb download of a few gigabytes of [IMDb datasets here](https://www.imdb.com/interfaces/). I've documented how I overcame data-loading difficulties.
+  * All other data are relatively tiny filesizes and included directly in this repository, including North American Industry Classification System from each [Canada](https://www.statcan.gc.ca/eng/subjects/standard/naics/2017/v3/index) and the [United States](https://www.census.gov/eos/www/naics/downloadables/downloadables.html).
+* Voilà, querable data.
+* Have fun, play, learn.
+
 
 Purpose
 =======
 
-* Practice data loading, stored procedures. More to come.
+* Practice data loading, stored procedures, splitting and joining comma-separated values into rows, joining multiple tables.
 
 
 Learned / Did
@@ -58,9 +66,11 @@ Like, justifying my actual statements:
 
 
 
-Sources
+Data Sources
 =======
-* Data sources acquired from [Kaggle](https://www.kaggle.com/) scripts Shows/Films:
+* [IMDb datasets here](https://www.imdb.com/interfaces/)
+* North American Industry Classification System from each [Canada](https://www.statcan.gc.ca/eng/subjects/standard/naics/2017/v3/index) and the [United States](https://www.census.gov/eos/www/naics/downloadables/downloadables.html)
+* [Kaggle](https://www.kaggle.com/) had some scripts Shows/Films:
 
     * [Game of Thrones](https://www.kaggle.com/albenft/game-of-thrones-script-all-seasons)
     * [Rick and Morty](https://www.kaggle.com/andradaolteanu/rickmorty-scripts)

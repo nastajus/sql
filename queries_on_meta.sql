@@ -44,3 +44,6 @@ FROM information_schema.TABLES
 -- wvchallenge_database	0.01
 
 -- total non-imdb 26 mb
+
+
+select version();

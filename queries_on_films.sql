@@ -96,6 +96,9 @@ join name_basics n
     on p.nconst = n.nconst
 where tconst = 'tt1051906';
 
+-- credits queries:
+-- ================ --
+
 -- **  gets cast for a title, and their other popular titles! **
     select b.primaryTitle,
            p.tconst, p.nconst,
@@ -156,3 +159,4 @@ join json_table(
 where j.eachPrimaryProfession != p.category
   and b.tconst = 'tt1051906'
 group by p.nconst;
+
