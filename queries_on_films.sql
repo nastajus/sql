@@ -160,3 +160,11 @@ where j.eachPrimaryProfession != p.category
   and b.tconst = 'tt1051906'
 group by p.nconst;
 
+
+
+--  find actor in specific genres only
+-- this version takes 3m30s long... sigh ... for 122 results.
+select n.nconst, n.primaryName, p.* from imdb.name_basics n
+join title_principals p
+    on n.nconst = p.nconst
+    where primaryName like 'rachel weisz'
