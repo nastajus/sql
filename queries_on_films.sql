@@ -164,11 +164,21 @@ group by p.nconst;
 
 --  find actor in specific genres only
 -- this version takes 3m30s long... sigh ... for 122 results.
+-- additional join to 3rd table `title_basics` brings total time up ... over 15 min.. done.
+-- .. maybe because no index...? oh wait! no it's the freaking like! replace with exact nconst search!
+-- holy bejesus... 38s.!
 select n.nconst, n.primaryName, b.primaryTitle, p.tconst, p.category, p.job, p.characters,
-       b.genres
+       -- b.genres
+       j.genre
 from imdb.name_basics n
 join title_principals p
     on n.nconst = p.nconst
 join title_basics b
     on p.tconst = b.tconst
-    where primaryName like 'rachel weisz'
+join json_table(
+  concat('[', replace(json_quote(b.genres), ',', '","'), ']'),
+  '$[*]' columns (genre varchar(64) path '$')
+) j
+    -- where primaryName like 'rachel weisz'
+    where n.nconst = 'nm0001838'
+    and genre = 'Sci-Fi'
