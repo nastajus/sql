@@ -180,8 +180,13 @@ join json_table(
 -- Chain Reaction, Black Widow
 
 
-select tb.tconst, primaryTitle, tp.nconst, nb.primaryName, primaryProfession
+select
+       group_concat(primaryTitle separator '; ') as primaryTitlesIn,
+       count(primaryTitle) as count,
+       primaryName
 from title_basics tb
 join title_principals tp on tp.tconst = tb.tconst
 join name_basics nb on nb.nconst = tp.nconst
 where primaryTitle like '%critical role%'
+group by primaryName
+order by count desc
