@@ -178,3 +178,10 @@ join json_table(
     where n.nconst = 'nm0001838'
     and genre = 'Sci-Fi'
 -- Chain Reaction, Black Widow
+
+
+select tb.tconst, primaryTitle, tp.nconst, nb.primaryName, primaryProfession
+from title_basics tb
+join title_principals tp on tp.tconst = tb.tconst
+join name_basics nb on nb.nconst = tp.nconst
+where primaryTitle like '%critical role%'
