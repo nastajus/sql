@@ -179,14 +179,18 @@ join json_table(
     and genre = 'Sci-Fi'
 -- Chain Reaction, Black Widow
 
-
-select
-       group_concat(primaryTitle separator '; ') as primaryTitlesIn,
-       count(primaryTitle) as count,
-       primaryName
+-- over 10 minutes, is bad, nvm
+select s.*, tb2.primaryTitle from (
+select count(primaryTitle) as count,
+       primaryName, nb.nconst
 from title_basics tb
 join title_principals tp on tp.tconst = tb.tconst
 join name_basics nb on nb.nconst = tp.nconst
 where primaryTitle like '%critical role%'
 group by primaryName
+having count > 2
 order by count desc
+) s
+join title_principals tp2 on tp2.nconst = s.nconst
+join title_basics tb2 on tb2.tconst = tp2.tconst
+
