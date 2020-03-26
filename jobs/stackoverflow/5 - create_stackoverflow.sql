@@ -10,7 +10,7 @@ CREATE TABLE stackoverflow
     id                 INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     # isPermaLink        VARCHAR(5),
     guid               VARCHAR(6),
-    link               VARCHAR(256),
+    # link               VARCHAR(256), -- pushed to end instead.
     author_name        VARCHAR(128),
     # category_0         VARCHAR(32),
     # category_1         VARCHAR(32),
@@ -18,13 +18,15 @@ CREATE TABLE stackoverflow
     # category_3         VARCHAR(32),
     # category_4         VARCHAR(32),
     categories         VARCHAR(256), # 128 *just* works in my sample download.
-    title              VARCHAR(256),
+    title              VARCHAR(128), # quick estimated size.
     description        VARCHAR(12222), # nope: 16384.  nope: 16383.  just do ~minimum
     pubDate            DATETIME,
     updatedDate        DATETIME,
-    posting_origin_url VARCHAR(32),
-    location           VARCHAR(64)
+    location           VARCHAR(64),
     # category_5         VARCHAR(32)
+    posting_origin_url VARCHAR(32),
+    verbose_title      VARCHAR(256),
+    link               VARCHAR(256)
 );
 
 # guid/_isPermaLink	guid/__text	link	author/name/__text	category/0	category/1	category/2	category/3	category/4	title	description	pubDate	updated/__text	location/_xmlns	location/__text	category/5
@@ -42,10 +44,14 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/stackoverflow/Feed/convertcsv.tsv' IGNORE
     OPTIONALLY ENCLOSED BY '"'
     LINES TERMINATED BY '\n'
     IGNORE 1 LINES
-    (@skipIsPermaLink, guid, link, author_name, @category_0, @category_1, @category_2, @category_3, @category_4, title, description, @pubDate, @updatedDate, posting_origin_url, location, @category_5)
+    (@skipIsPermaLink, guid, @link, author_name, @category_0, @category_1, @category_2, @category_3, @category_4, @verbose_title, description, @pubDate, @updatedDate, @posting_origin_url, location, @category_5)
 SET categories = CONCAT_WS('; ', @category_0, @category_1, @category_2, @category_3, @category_4, @category_5),
     pubDate = STR_TO_DATE(@pubDate,'%a, %d %b %Y %T Z'),
-    updatedDate = STR_TO_DATE(@updatedDate,'%Y-%m-%dT%TZ')
+    updatedDate = STR_TO_DATE(@updatedDate,'%Y-%m-%dT%TZ'),
+    link = @link,
+    title = SUBSTRING_INDEX(@verbose_title, ' at ', 1),
+    verbose_title = @verbose_title,
+    posting_origin_url = @posting_origin_url;
 
     # Sat, 21 Mar 2020 17:02:44 Z -- Z normally indicates "zulu" time, aka, UTC/GMT
     # %a_, %d %b_ %Y__ %T______ Z
