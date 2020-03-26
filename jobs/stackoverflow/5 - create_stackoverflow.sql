@@ -24,8 +24,8 @@ CREATE TABLE stackoverflow
     updatedDate        DATETIME,
         loadedDate         DATE, -- EXTRA CALCULATION
         pubAge             INT,  -- EXTRA CALCULATION
-        updatedAge         INT,  -- EXTRA CALCULATION
-        hasUpdated         BOOL, -- EXTRA CALCULATION
+#        updatedAge         INT,  -- EXTRA CALCULATION
+#        hasUpdated         BOOL, -- EXTRA CALCULATION
     location           VARCHAR(64),
     # category_5         VARCHAR(32)
     posting_origin_url VARCHAR(32),
@@ -57,9 +57,10 @@ SET categories = CONCAT_WS('; ', @category_0, @category_1, @category_2, @categor
     verbose_title = @verbose_title,
     posting_origin_url = @posting_origin_url,
     loadedDate = CURRENT_DATE(),
-    pubAge = DATEDIFF(loadedDate, pubDate),
-    updatedAge = DATEDIFF(loadedDate, updatedDate),
-    hasUpdated = updatedDate > pubDate;
+    pubAge = DATEDIFF(loadedDate, pubDate);
+#ehh don't need these:
+    # updatedAge = DATEDIFF(loadedDate, updatedDate),
+    # hasUpdated = updatedDate > pubDate;
 
     # Sat, 21 Mar 2020 17:02:44 Z -- Z normally indicates "zulu" time, aka, UTC/GMT
     # %a_, %d %b_ %Y__ %T______ Z
