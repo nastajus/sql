@@ -1,0 +1,15 @@
+initially
+
+	=IF(AND(B3="",NOT(C3="")),C3, IF(A3="","",A3))
+
+then - after removing fully empty rows in sublime
+
+	=IF(AND(B2="",NOT(C2="")),C2, IF(A2="","",A2))
+
+then - after moving left-most column to right one by cut-paste...or something.
+
+	=IF(A12="","",IF(AND(A11="",NOT(C11="")),C11,IF(B11="","",B11)))
+
+
+get rid of company-only lines in sublime
+		[\w]+						\n
