@@ -163,8 +163,8 @@ group by p.nconst;
 
 
 --  find actor in specific genres only
-select n.nconst, n.primaryName, b.primaryTitle, p.tconst, p.category, p.job, p.characters,
-       j.genre
+select n.nconst, n.primaryName, b.primaryTitle, p.tconst, p.category, startYear, p.characters,
+       j.genre -- p.job,
 from imdb.name_basics n
 join title_principals p
     on n.nconst = p.nconst
@@ -175,12 +175,15 @@ join json_table(
   '$[*]' columns (genre varchar(64) path '$')
 ) j
     -- where primaryName like 'rachel weisz'
-    where n.nconst = 'nm0001838'
-    and genre = 'Sci-Fi'
+    where n.nconst = 'nm0001838';
+    -- and genre = 'Sci-Fi'
 -- Chain Reaction, Black Widow
 
+
+
 select s.*, tp2.tconst,
-   count(tconst) as countTConsts
+   count(tp2.tconst) as countTConsts,
+       tb2.primaryTitle
 from (
 select count(tb.primaryTitle) as countTitles,
        primaryName, nb.nconst -- ,
@@ -195,8 +198,29 @@ having countTitles > 2
 -- order by count desc;
 ) s
 join title_principals tp2 on tp2.nconst = s.nconst
+join title_basics tb2 on tb2.tconst = tp2.tconst
 group by tp2.tconst
 having countTConsts > 2
 order by countTConsts desc;
 
-join title_basics tb2 on tb2.tconst = tp2.tconst
+
+
+-- female directors list... just googled that...
+-- select * from name_basics where primaryName like in ('');
+-- select * from name_basics where FIND_IN_SET (''); -- FIND_IN_SET does not accept wildcards like %
+select nb.primaryName, nb.nconst,
+tp.tconst, tp.category, tp.job, tp.characters,
+tb.primaryTitle, tb.startYear, tb.genres,
+tr.averageRating * tr.numVotes as 'popularity'
+from name_basics nb
+join title_principals tp on nb.nconst = tp.nconst
+join title_basics tb on tp.tconst = tb.tconst
+join title_ratings tr on tb.tconst = tr.tconst
+where primaryName in ('Kathryn Bigelow', 'Greta Gerwig', 'Ava DuVernay', 'Patty Jenkins', 'Sofia Coppola', 'Jane Campion', 'Marielle Heller', 'Lulu Wang', 'Lorene Scafaria', 'Céline Sciamma', 'Lynne Ramsay', 'Melina Matsoukas', 'Kasi Lemmons', 'Jennifer Lee', 'Claire Denis', 'Debra Granik', 'Natalie Portman', 'Chloé Zhao', 'Lina Wertmüller', 'Penny Marshall', 'Andrea Arnold', 'Catherine Hardwicke', 'Olivia Wilde', 'Niki Caro', 'Dee Rees', 'Mira Nair', 'Nora Ephron', 'Angelina Jolie', 'Mimi Leder', 'Jennifer Kent', 'Susanne Bier', 'Amma Asante', 'Elizabeth Banks', 'Sarah Polley', 'Barbra Streisand', 'Karyn Kusama', 'Agnès Varda', 'Alma Har\'el', 'Chantal Akerman', 'Ida Lupino', 'Cathy Yan', 'Tamara Jenkins', 'Mary Harron', 'Sally Potter', 'Nancy Meyers', 'Sam Taylor-Johnson', 'Anna Boden', 'Reed Morano', 'Lisa Cholodenko', 'Nicole Holofcener', 'Jennifer Lawrence')
+and tp.category = 'director'
+-- limit 20
+-- with limit 1 + no category filter:   in 6 m 5 s 43 ms (execution: 6 m 5 s 10 ms, fetching: 33 ms)
+-- with limit 20 + category = director: hours...?
+-- no limit ...... overnight?
+-- order by popularity desc
+;
