@@ -31,6 +31,9 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/remoteweekly/1575 Remote Jobs From 100+ Compan
     (@skipNum, company, position, @vDatePosted, location, salary, labels, companyUrl, link, dateLoaded)
 SET datePosted = STR_TO_DATE(@vDatePosted,'%m/%d/%Y'),
     dateLoaded = CURRENT_DATE(),
-    dateDiff = DATEDIFF(dateLoaded, datePosted);
+    dateDiff = DATEDIFF(dateLoaded, datePosted); -- again, hack to do this here, better perhaps in a view. whatever.
+
+
+
 
 
