@@ -51,6 +51,7 @@ LOAD DATA INFILE 'D:/[[TO QUERY]]/stackoverflow/Feed/convertcsv.tsv' IGNORE
     IGNORE 1 LINES
     (@skipIsPermaLink, guid, @link, author_name, @category_0, @category_1, @category_2, @category_3, @category_4, @verbose_title, description, @pubDate, @updatedDate, @posting_origin_url, location, @category_5)
 SET categories = CONCAT_WS('; ', @category_0, @category_1, @category_2, @category_3, @category_4, @category_5),
+    categories = SUBSTRING_INDEX(categories, ' ;', 1), # filter out blanks, since `CONCAT_WS() does not skip empty strings`.
     pubDate = STR_TO_DATE(@pubDate,'%a, %d %b %Y %T Z'),
     updatedDate = STR_TO_DATE(@updatedDate,'%Y-%m-%dT%TZ'),
     link = @link,
@@ -59,8 +60,8 @@ SET categories = CONCAT_WS('; ', @category_0, @category_1, @category_2, @categor
     posting_origin_url = @posting_origin_url,
     loadedDate = CURRENT_DATE(),
     pubAge = DATEDIFF(loadedDate, pubDate),
-    -- isToronto = CONTAINS(location, '*Toronto*') > 0;
     isToronto = LOCATE('Toronto', location) > 0;
+
 #ehh don't need these:
     # updatedAge = DATEDIFF(loadedDate, updatedDate),
     # hasUpdated = updatedDate > pubDate;
@@ -70,3 +71,7 @@ SET categories = CONCAT_WS('; ', @category_0, @category_1, @category_2, @categor
 
     # 2020-02-28T14:36:36Z
     # %Y__-%m-%dTT%______Z
+
+
+#CONCAT_WS() does not skip empty strings. However, it does skip any NULL values after the separator argument
+# wait. how do i even...
